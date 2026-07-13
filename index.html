@@ -214,12 +214,24 @@
         </header>
 
         <main class="max-w-6xl mx-auto px-6 py-16 flex-1 w-full">
-            <div class="max-w-2xl mb-14">
+            <div class="max-w-2xl mb-10">
                 <h1 class="text-3xl font-extrabold text-red-950 tracking-tight sm:text-4xl mb-3">Eksplorasi Peluang Karier Internal</h1>
                 <p class="text-base text-slate-600 leading-relaxed">Kembangkan potensi dirimu!</p>
             </div>
-            <div id="job-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div id="loading-state" class="col-span-full text-center py-16 glass-card rounded-2xl">
+
+            <!-- TABS STATUS LOWONGAN -->
+            <div class="flex space-x-2 border-b border-slate-200 mb-8 shrink-0">
+                <button onclick="switchStatusTab('open')" id="tab-open" class="px-5 py-2.5 text-sm font-bold border-b-2 border-rose-800 text-rose-800 transition-all">
+                    Open Vacant Position (<span id="count-open">0</span>)
+                </button>
+                <button onclick="switchStatusTab('closed')" id="tab-closed" class="px-5 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all">
+                    Closed Vacant Position (<span id="count-closed">0</span>)
+                </button>
+            </div>
+
+            <!-- CONTAINER UTAMA SCORE CARD -->
+            <div id="job-container" class="space-y-12">
+                <div id="loading-state" class="text-center py-16 glass-card rounded-2xl">
                     <div class="inline-block animate-spin rounded-full h-7 w-7 border-3 border-rose-500 border-t-transparent mb-3"></div>
                     <p class="text-slate-400 text-sm font-medium">Sinkronisasi data lowongan...</p>
                 </div>
@@ -367,6 +379,8 @@
 
         let currentActiveJob = null;
         let currentActiveCompany = null;
+        let allJobsData = []; // Menyimpan data mentah lowongan global
+        let currentStatusFilter = 'open'; // Default tab aktif
 
         // FUNGSI NAVIGASI PADA MULTI-STEP PROFILE
         function navigatePage(prefix, pageNumber) {
@@ -374,7 +388,6 @@
             const page2 = document.getElementById(`${prefix}-page-2`);
             const indicator = document.getElementById(`${prefix}-step-indicator`);
 
-            // Validasi kelayakan halaman 1 sebelum beranjak ke halaman 2
             if(pageNumber === 2) {
                 const inputsPage1 = page1.querySelectorAll('input[required], select[required]');
                 let isValid = true;
@@ -411,7 +424,6 @@
             if(data && data.length > 0) {
                 data.forEach((cert, idx) => addCertificationField(prefix, cert.nama, cert.expired, cert.link));
             } else {
-                // Default memunculkan 2 set pertanyaan kosong saat awal mendaftar
                 addCertificationField(prefix);
                 addCertificationField(prefix);
             }
@@ -421,7 +433,6 @@
             const container = document.getElementById(`${prefix}-certifications-container`);
             const index = container.children.length;
             
-            // Konversi format tanggal DD-MM-YYYY ke YYYY-MM-DD agar dibaca element input type="date"
             let formattedDate = "";
             if (expired && expired.includes('-')) {
                 const parts = expired.split('-');
@@ -469,7 +480,7 @@
                     const day = String(d.getDate()).padStart(2, '0');
                     const month = String(d.getMonth() + 1).padStart(2, '0');
                     const year = d.getFullYear();
-                    expiredFormatted = `${day}-${month}-${year}`; // Ubah ke DD-MM-YYYY
+                    expiredFormatted = `${day}-${month}-${year}`;
                 }
 
                 if(nama || expiredFormatted || link) {
@@ -502,7 +513,7 @@
         }
 
         function openEditProfileModal() {
-            navigatePage('edit', 1); // Reset selalu buka halaman 1 dahulu
+            navigatePage('edit', 1);
             const savedProfile = JSON.parse(localStorage.getItem('user_profile_completed'));
             if (savedProfile) {
                 document.getElementById('edit-nama').value = savedProfile.nama || '';
@@ -591,7 +602,6 @@
                 document.getElementById('form-durasi').value = savedProfile.durasi;
                 document.getElementById('form-cv').value = savedProfile.cvLink;
                 
-                // Kemas data seluruh kompetensi/sertifikasi menjadi format teks ringkas
                 let certsString = "Tidak Ada";
                 if(savedProfile.certifications && savedProfile.certifications.length > 0){
                     certsString = savedProfile.certifications.map(c => `${c.nama} (Exp: ${c.expired || '-'}) Link: ${c.link || '-'}`).join(' | ');
@@ -658,7 +668,6 @@
             
             const namaDanStatusPegawai = isAdhi === 'Ya' ? `${nama} (Pegawai ADHI - NPP: ${npp})` : `${nama} (Bukan Pegawai ADHI)`;
 
-            // Menggabungkan seluruh data pelengkap (posisi, alasan lamaran, assessment, dan kompetensi bersertifikat) ke field alasanDanAssessment backend
             const payload = {
                 nama: namaDanStatusPegawai, 
                 phone: phone, 
@@ -672,6 +681,27 @@
             fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
             .then(() => { alert(`Aplikasi pendaftaran posisi "${currentActiveJob}" berhasil dikirim!`); closeModal(); })
             .catch(err => { console.error(err); alert('Terjadi kesalahan saat mengirim data.'); });
+        }
+
+        // ==========================================
+        // LOGIKA BARU UNTUK SCORE CARD BERDASARKAN STATUS & DEPARTEMEN & LOKASI
+        // ==========================================
+
+        function switchStatusTab(status) {
+            currentStatusFilter = status;
+            
+            const tabOpen = document.getElementById('tab-open');
+            const tabClosed = document.getElementById('tab-closed');
+            
+            if (status === 'open') {
+                tabOpen.className = "px-5 py-2.5 text-sm font-bold border-b-2 border-rose-800 text-rose-800 transition-all";
+                tabClosed.className = "px-5 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all";
+            } else {
+                tabOpen.className = "px-5 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all";
+                tabClosed.className = "px-5 py-2.5 text-sm font-bold border-b-2 border-rose-800 text-rose-800 transition-all";
+            }
+            
+            renderGroupedJobs();
         }
 
         async function fetchJobs() {
@@ -695,58 +725,124 @@
                 const idxRequirement = headers.findIndex(h => h.includes('kualifikasi') || h.includes('requirement'));
                 const idxStatus = headers.findIndex(h => h.includes('status'));
 
-                let htmlContent = '';
+                allJobsData = [];
+                let openCount = 0;
+                let closedCount = 0;
+
                 data.table.rows.forEach(row => {
                     if (!row || !row.c) return;
                     const jabatan = (idxJabatan !== -1 && row.c[idxJabatan]) ? String(row.c[idxJabatan].v) : 'Posisi Tidak Terbaca';
-                    const departemen = (idxDepartemen !== -1 && row.c[idxDepartemen]) ? String(row.c[idxDepartemen].v) : '-';
-                    const penugasan = (idxPenugasan !== -1 && row.c[idxPenugasan]) ? String(row.c[idxPenugasan].v) : 'Internal';
+                    const departemen = (idxDepartemen !== -1 && row.c[idxDepartemen]) ? String(row.c[idxDepartemen].v) : 'Umum';
+                    
+                    let penugasanRaw = (idxPenugasan !== -1 && row.c[idxPenugasan]) ? String(row.c[idxPenugasan].v) : 'Kantor';
+                    let penugasan = penugasanRaw.toLowerCase().includes('proyek') ? 'Proyek' : 'Kantor';
+                    
                     const aktivitas = (idxAktivitas !== -1 && row.c[idxAktivitas]) ? String(row.c[idxAktivitas].v) : 'Detail aktivitas belum diisi.';
                     const requirement = (idxRequirement !== -1 && row.c[idxRequirement]) ? String(row.c[idxRequirement].v) : '';
-                    let status = (idxStatus !== -1 && row.c[idxStatus] && row.c[idxStatus].v) ? String(row.c[idxStatus].v).trim() : 'Open';
+                    let statusRaw = (idxStatus !== -1 && row.c[idxStatus] && row.c[idxStatus].v) ? String(row.c[idxStatus].v).trim() : 'Open';
+                    let status = statusRaw.toLowerCase() === 'open' ? 'open' : 'closed';
 
-                    const isOpen = status.toLowerCase() === 'open';
-                    const safeJabatan = jabatan.replace(/"/g, '&quot;');
-                    const safeDept = departemen.replace(/"/g, '&quot;');
-                    const safeReq = requirement.replace(/"/g, '&quot;');
-                    const safeAkt = aktivitas.replace(/"/g, '&quot;');
+                    if (status === 'open') openCount++; else closedCount++;
 
-                    const buttonHTML = isOpen 
-                        ? `<button onclick="triggerApplyModal(this)" data-jabatan="${safeJabatan}" data-departemen="${safeDept}" data-requirement="${safeReq}" data-aktivitas="${safeAkt}" class="inline-flex items-center justify-center bg-red-800 hover:bg-red-900 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm transition-all">Apply Position</button>`
-                        : `<span class="text-xs font-bold text-rose-700 bg-rose-100 px-3 py-1.5 rounded-lg border border-rose-200">Position Closed</span>`;
-
-                    htmlContent += `
-                        <div class="glass-card rounded-2xl p-6 flex flex-col justify-between group cursor-pointer">
-                            <div>
-                                <div class="flex justify-between items-center mb-4">
-                                    <span class="text-[10px] font-bold bg-slate-200/60 text-slate-700 px-2.5 py-1 rounded-lg uppercase tracking-wider">${penugasan}</span>
-                                    <div class="flex items-center space-x-1.5">
-                                        <span class="w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
-                                        <span class="text-[10px] font-bold uppercase ${isOpen ? 'text-emerald-600' : 'text-rose-600'}">${isOpen?'Open':'Closed'}</span>
-                                    </div>
-                                </div>
-                                <h3 class="text-base font-bold text-slate-900 mb-0.5 line-clamp-1">${jabatan}</h3>
-                                <p class="text-xs text-slate-500 font-medium mb-4">${departemen}</p>
-                                <div class="space-y-3 border-t border-slate-200/60 pt-3">
-                                    <div>
-                                        <h4 class="text-[11px] font-bold text-red-800 uppercase tracking-wide">Aktivitas Utama:</h4>
-                                        <p class="text-xs text-slate-600 line-clamp-3 mt-0.5 leading-relaxed">${aktivitas}</p>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-[11px] font-bold text-slate-700 uppercase tracking-wide">Kualifikasi:</h4>
-                                        <p class="text-xs text-slate-500 line-clamp-2 mt-0.5 leading-relaxed">${requirement.replace(/\|/g, ' • ')}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mt-6 pt-4 border-t border-slate-200/60 flex items-center justify-end">${buttonHTML}</div>
-                        </div>
-                    `;
+                    allJobsData.push({
+                        jabatan, departemen, penugasan, aktivitas, requirement, status
+                    });
                 });
-                container.innerHTML = htmlContent;
+
+                document.getElementById('count-open').innerText = openCount;
+                document.getElementById('count-closed').innerText = closedCount;
+
+                renderGroupedJobs();
+
             } catch (error) {
                 console.error(error);
                 container.innerHTML = '<p class="text-center text-rose-600 py-8">Gagal memuat lowongan kerja.</p>';
             } finally { if (skeleton) skeleton.classList.add('hidden'); }
+        }
+
+        function renderGroupedJobs() {
+            const container = document.getElementById('job-container');
+            container.innerHTML = '';
+
+            const filteredJobs = allJobsData.filter(j => j.status === currentStatusFilter);
+
+            if (filteredJobs.length === 0) {
+                container.innerHTML = `<p class="text-center text-slate-400 py-12 bg-white/50 rounded-2xl border border-slate-200 text-sm">Tidak ada lowongan dengan status ini.</p>`;
+                return;
+            }
+
+            const groupedByDept = {};
+            filteredJobs.forEach(job => {
+                if (!groupedByDept[job.departemen]) {
+                    groupedByDept[job.departemen] = { Kantor: [], Proyek: [] };
+                }
+                groupedByDept[job.departemen][job.penugasan].push(job);
+            });
+
+            let htmlContent = '';
+            for (const deptName in groupedByDept) {
+                htmlContent += `
+                    <div class="bg-white/70 backdrop-blur-md rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-6">
+                        <div class="border-b border-slate-200 pb-2.5">
+                            <h2 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+                                <span class="w-1.5 h-5 bg-rose-800 rounded-full"></span>
+                                <span>Departemen: ${deptName}</span>
+                            </h2>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
+                                    <span>🏢 Penugasan Kantor</span>
+                                    <span class="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded text-[10px] font-bold">${groupedByDept[deptName]['Kantor'].length}</span>
+                                </h3>
+                                <div class="space-y-3">
+                                    ${generateJobCardsHTML(groupedByDept[deptName]['Kantor'])}
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
+                                    <span>🏗️ Penugasan Proyek</span>
+                                    <span class="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded text-[10px] font-bold">${groupedByDept[deptName]['Proyek'].length}</span>
+                                </h3>
+                                <div class="space-y-3">
+                                    ${generateJobCardsHTML(groupedByDept[deptName]['Proyek'])}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = htmlContent;
+        }
+
+        function generateJobCardsHTML(jobsList) {
+            if (jobsList.length === 0) {
+                return `<p class="text-xs text-slate-400 italic py-4 bg-slate-50/50 rounded-xl text-center border border-dashed border-slate-200">Tidak ada lowongan</p>`;
+            }
+
+            return jobsList.map(job => {
+                const isOpen = job.status === 'open';
+                const safeJabatan = job.jabatan.replace(/"/g, '&quot;');
+                const safeDept = job.departemen.replace(/"/g, '&quot;');
+                const safeReq = job.requirement.replace(/"/g, '&quot;');
+                const safeAkt = job.aktivitas.replace(/"/g, '&quot;');
+
+                const buttonHTML = isOpen 
+                    ? `<button onclick="triggerApplyModal(this)" data-jabatan="${safeJabatan}" data-departemen="${safeDept}" data-requirement="${safeReq}" data-aktivitas="${safeAkt}" class="w-full sm:w-auto text-center bg-red-800 hover:bg-red-900 text-white font-semibold text-[11px] px-3 py-1.5 rounded-lg shadow-sm transition-all shrink-0">Apply</button>`
+                    : `<span class="text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-1 rounded border border-rose-200 shrink-0">Closed</span>`;
+
+                return `
+                    <div class="p-4 bg-slate-50 border border-slate-200/70 hover:border-slate-300 rounded-xl transition-all shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="space-y-1 max-w-[80%]">
+                            <h4 class="text-sm font-bold text-slate-800 line-clamp-1">${job.jabatan}</h4>
+                            <p class="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">${job.requirement.replace(/\|/g, ' • ')}</p>
+                        </div>
+                        <div class="flex items-center justify-end">${buttonHTML}</div>
+                    </div>
+                `;
+            }).join('');
         }
     </script>
 </body>
