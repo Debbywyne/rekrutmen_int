@@ -66,7 +66,7 @@
             </div>
             <div class="flex items-center space-x-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full">
                 <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
-                <span class="text-xs text-slate-300 font-medium tracking-wide">Internal Career Hub</span>
+                <span class="text-xs text-slate-300 font-medium tracking-wide">BMT </span>
             </div>
         </div>
     </header>
@@ -339,54 +339,69 @@ function handleFormSubmit(event) {
 }
 
         async function fetchJobs() {
-            const container = document.getElementById('job-container');
+            const container = document.getElementById('jobs-container');
+            const skeleton = document.getElementById('skeleton-loader');
+            
             try {
                 const response = await fetch(SHEET_URL);
                 const text = await response.text();
-                const jsonData = JSON.parse(text.substring(47, text.length - 2));
+                const data = JSON.parse(text.substr(47).slice(0, -2));
                 
-                const cols = jsonData.table.cols;
-                const rows = jsonData.table.rows;
-                container.innerHTML = '';
-
-                if (!rows || rows.length === 0) {
-                    container.innerHTML = `<div class="col-span-full text-center py-16 glass-card rounded-2xl p-8"><p class="text-slate-400 text-sm font-medium">Belum ada posisi lowongan aktif saat ini.</p></div>`;
+                if (!data.table || !data.table.rows || data.table.rows.length === 0) {
+                    container.innerHTML = '<p class="text-center text-slate-500 py-8">Belum ada lowongan yang tersedia saat ini.</p>';
+                    skeleton.classList.add('hidden');
                     return;
                 }
 
-                function findColumnIndex(keywords) {
-                    return cols.findIndex(col => {
-                        if (!col || !col.label) return false;
-                        const labelClean = col.label.toLowerCase().replace(/\s+/g, '');
-                        return keywords.some(keyword => labelClean.includes(keyword.toLowerCase().replace(/\s+/g, '')));
-                    });
-                }
+                const headers = data.table.cols.map(col => col ? col.label : '');
+                const idxJabatan = headers.findIndex(h => h && h.toLowerCase().includes('jabatan') || h.toLowerCase().includes('posisi'));
+                const idxDepartemen = headers.findIndex(h => h && h.toLowerCase().includes('departemen') || h.toLowerCase().includes('divisi'));
+                const idxPenugasan = headers.findIndex(h => h && h.toLowerCase().includes('penugasan') || h.toLowerCase().includes('tipe') || h.toLowerCase().includes('status penugasan'));
+                const idxAktivitas = headers.findIndex(h => h && h.toLowerCase().includes('aktivitas'));
+                const idxRequirement = headers.findIndex(h => h && h.toLowerCase().includes('kualifikasi') || h.toLowerCase().includes('requirement'));
+                
+                // Tambahan indeks otomatis untuk mendeteksi kolom Status
+                const idxStatus = headers.findIndex(h => h && h.toLowerCase() === 'status');
 
-                const idxJabatan = findColumnIndex(['jabatan', 'posisi']);
-                const idxDepartemen = findColumnIndex(['departemen', 'divisi', 'biro']);
-                const idxPenugasan = findColumnIndex(['penugasan', 'lokasi', 'tempat']);
-                const idxAktivitas = findColumnIndex(['aktivitas', 'tugas', 'dilakukan', 'jobdesc']);
-                const idxRequirement = findColumnIndex(['requirement', 'syarat', 'kualifikasi']);
+                let htmlContent = '';
 
-                rows.forEach(row => {
-                    if (!row || !row.c) return;
-
+                data.table.rows.forEach(row => {
                     const jabatan = (idxJabatan !== -1 && row.c[idxJabatan]) ? row.c[idxJabatan].v : 'Posisi Tidak Terbaca';
                     const departemen = (idxDepartemen !== -1 && row.c[idxDepartemen]) ? row.c[idxDepartemen].v : '-';
                     const penugasan = (idxPenugasan !== -1 && row.c[idxPenugasan]) ? row.c[idxPenugasan].v : 'Internal';
                     const aktivitas = (idxAktivitas !== -1 && row.c[idxAktivitas]) ? row.c[idxAktivitas].v : 'Detail aktivitas belum diisi.';
-                    const requirement = (idxRequirement !== -1 && row.c[idxRequirement]) ? row.c[idxRequirement].v : 'Kualifikasi umum';
+                    const requirement = (idxRequirement !== -1 && row.c[idxRequirement]) ? row.c[idxRequirement].v : '';
+                    
+                    // Membaca kolom Status dari Google Sheets, default 'Open' jika kosong/tidak ada kolomnya
+                    const status = (idxStatus !== -1 && row.c[idxStatus]) ? row.c[idxStatus].v : 'Open';
 
-                    const cardHTML = `
+                    // Logika warna & teks status dinamis
+                    const isOpen = status.toLowerCase() === 'open';
+                    const statusText = isOpen ? 'Open' : 'Closed';
+                    const statusDotColor = isOpen ? 'bg-emerald-500 group-hover:bg-emerald-300' : 'bg-rose-500 group-hover:bg-rose-300';
+                    const statusTextColor = isOpen ? 'text-emerald-600 group-hover:text-emerald-300' : 'text-rose-600 group-hover:text-rose-300';
+                    
+                    // Logika tampilan tombol apply berdasarkan status lowongan
+                    const buttonHTML = isOpen 
+                        ? `<button onclick="openApplyModal('${jabatan.replace(/'/g, "\\'")}', '${departemen.replace(/'/g, "\\'")}', '${requirement.replace(/'/g, "\\'")}')"
+                              class="inline-flex items-center justify-center bg-red-800 hover:bg-red-900 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm group-hover:bg-white group-hover:text-red-900 transition-all">
+                              Apply Position
+                           </button>`
+                        : `<span class="text-xs font-bold text-rose-700 bg-rose-100 group-hover:bg-rose-900 group-hover:text-rose-100 px-3 py-1.5 rounded-lg border border-rose-200 group-hover:border-rose-700 transition-all">Position Closed</span>`;
+
+                    htmlContent += `
                         <div class="glass-card rounded-2xl p-6 flex flex-col justify-between group cursor-pointer">
                             <div>
                                 <div class="flex justify-between items-center mb-4">
                                     <span class="text-[10px] font-bold bg-slate-200/60 text-slate-700 px-2.5 py-1 rounded-lg border border-white/20 uppercase tracking-wider group-hover:bg-red-900 group-hover:text-red-200">${penugasan}</span>
+                                    
+                                    <!-- Indikator Status Dinamis -->
                                     <div class="flex items-center space-x-1.5">
-                                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse group-hover:bg-emerald-300"></span>
-                                        <span class="text-[10px] font-bold text-emerald-600 tracking-wide uppercase group-hover:text-emerald-300">Open</span>
+                                        <span class="w-1.5 h-1.5 rounded-full animate-pulse ${statusDotColor}"></span>
+                                        <span class="text-[10px] font-bold tracking-wide uppercase ${statusTextColor}">${statusText}</span>
                                     </div>
                                 </div>
+                                
                                 <h3 class="text-base font-bold text-slate-900 mb-0.5 group-hover:text-white line-clamp-1">${jabatan}</h3>
                                 <p class="text-xs text-slate-500 font-medium mb-4 group-hover:text-red-200">${departemen}</p>
                                 
@@ -401,21 +416,21 @@ function handleFormSubmit(event) {
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!-- Tombol Dinamis -->
                             <div class="mt-6 pt-4 border-t border-slate-200/60 flex items-center justify-end group-hover:border-red-700">
-                                <!-- Tombol saat card di-hover akan berubah warna putih agar kontras -->
-                                <button onclick="openApplyModal('${jabatan.replace(/'/g, "\\'")}', '${departemen.replace(/'/g, "\\'")}', '${requirement.replace(/'/g, "\\'")}')"
-                                   class="inline-flex items-center justify-center bg-red-800 hover:bg-red-900 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm group-hover:bg-white group-hover:text-red-900">
-                                    Apply Position
-                                </button>
+                                ${buttonHTML}
                             </div>
                         </div>
                     `;
-                    container.insertAdjacentHTML('beforeend', cardHTML);
                 });
 
+                container.innerHTML = htmlContent;
             } catch (error) {
-                console.error('Error Sync Sheet:', error);
-                container.innerHTML = `<div class="col-span-full text-center py-12 bg-red-950/20 border border-red-900/50 rounded-2xl p-8 text-red-400"><p class="text-sm font-semibold">Gagal memproses sinkronisasi data lowongan.</p></div>`;
+                console.error('Error fetching jobs:', error);
+                container.innerHTML = '<p class="text-center text-rose-600 py-8">Gagal memuat lowongan kerja. Pastikan link Google Sheet sudah benar dan di-publish ke web.</p>';
+            } finally {
+                skeleton.classList.add('hidden');
             }
         }
 
