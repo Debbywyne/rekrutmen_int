@@ -37,16 +37,17 @@
             transition: color 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
         }
 
+        /* Diubah menjadi solid putih/terang agar teks gelap di dalamnya kontras */
         .glass-modal {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.1);
         }
 
         .glass-input {
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.12);
             color: #1e293b;
         }
         .glass-input:focus {
@@ -72,14 +73,11 @@
     </header>
 
     <!-- Main Content -->
-    <!-- Main Content -->
-<main class="max-w-6xl mx-auto px-6 py-16 flex-1 w-full">
-    <div class="max-w-2xl mb-14">
-        <!-- Headline: Menggunakan warna Maroon tegas agar kontras di latar belakang terang -->
-        <h1 class="text-3xl font-extrabold text-red-950 tracking-tight sm:text-4xl mb-3">Eksplorasi Peluang Karier Internal</h1>
-        <!-- Subheadline: Menggunakan abu-abu slate gelap agar teks mudah terbaca -->
-        <p class="text-base text-slate-600 leading-relaxed">Kembangkan potensi dirimu!</p>
-    </div>
+    <main class="max-w-6xl mx-auto px-6 py-16 flex-1 w-full">
+        <div class="max-w-2xl mb-14">
+            <h1 class="text-3xl font-extrabold text-red-950 tracking-tight sm:text-4xl mb-3">Eksplorasi Peluang Karier Internal</h1>
+            <p class="text-base text-slate-600 leading-relaxed">Kembangkan potensi dirimu!</p>
+        </div>
 
         <!-- Container Lowongan -->
         <div id="job-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -101,13 +99,13 @@
     <div id="apply-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4 transition-all duration-300">
         <div class="glass-modal rounded-2xl max-w-xl w-full shadow-2xl max-h-[85vh] flex flex-col transform transition-all scale-95 opacity-0 duration-200" id="modal-box">
             
-            <!-- Header Modal -->
-            <div class="flex justify-between items-start p-6 border-b border-white/10 shrink-0">
+            <!-- Header Modal (Warna Font Diganti Gelap) -->
+            <div class="flex justify-between items-start p-6 border-b border-slate-200 shrink-0">
                 <div>
-                    <h3 class="text-lg font-bold text-white" id="modal-job-title">Apply Job</h3>
-                    <p class="text-xs font-medium text-rose-300 mt-0.5" id="modal-job-company">Perusahaan</p>
+                    <h3 class="text-xl font-bold text-slate-900" id="modal-job-title">Apply Job</h3>
+                    <p class="text-xs font-semibold text-rose-700 mt-0.5" id="modal-job-company">Perusahaan</p>
                 </div>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-white/5 transition-colors">
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
@@ -115,48 +113,56 @@
             <!-- Form Konten -->
             <form id="screening-form" onsubmit="handleFormSubmit(event)" class="space-y-6 overflow-y-auto p-6 flex-1 custom-scroll">
                 
+                <!-- BAGIAN BARU: DESKRIPSI JABATAN LENGKAP -->
+                <div class="p-4 bg-red-50 border border-red-100 rounded-xl space-y-3">
+                    <div>
+                        <h4 class="text-xs font-bold text-red-950 uppercase tracking-wide">Aktivitas Utama Pekerjaan:</h4>
+                        <p id="modal-job-aktivitas" class="text-xs text-slate-700 mt-1 leading-relaxed whitespace-pre-line"></p>
+                    </div>
+                </div>
+
                 <!-- BAGIAN 1: DATA DIRI -->
-                <div class="space-y-4">
+                <div class="space-y-4 pt-2">
                     <div class="flex items-center space-x-2 mb-2">
                         <span class="w-1 h-4 bg-gradient-to-b from-rose-500 to-purple-500 rounded-full"></span>
-                        <p class="text-xs font-bold text-slate-200 uppercase tracking-wider">1. Informasi Personal</p>
+                        <p class="text-xs font-bold text-slate-900 uppercase tracking-wider">1. Informasi Personal</p>
                     </div>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="sm:col-span-2">
-                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Nama Lengkap (Sesuai KTP) <span class="text-rose-400">*</span></label>
-                            <input type="text" required id="form-nama" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-600" placeholder="Masukkan nama lengkap">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Lengkap (Sesuai KTP) <span class="text-rose-600">*</span></label>
+                            <input type="text" required id="form-nama" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-400" placeholder="Masukkan nama lengkap">
                         </div>
                         
                         <div>
-                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">No. WhatsApp Aktif <span class="text-rose-400">*</span></label>
-                            <input type="tel" required id="form-phone" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-600" placeholder="Contoh: 08123456789">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">No. WhatsApp Aktif <span class="text-rose-600">*</span></label>
+                            <input type="tel" required id="form-phone" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-400" placeholder="Contoh: 08123456789">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Durasi di Penugasan Sekarang <span class="text-rose-400">*</span></label>
-                            <input type="text" required id="form-durasi" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-600" placeholder="Contoh: 1 Tahun 3 Bulan">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Durasi di Penugasan Sekarang <span class="text-rose-600">*</span></label>
+                            <input type="text" required id="form-durasi" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-400" placeholder="Contoh: 1 Tahun 3 Bulan">
                         </div>
 
                         <div class="sm:col-span-2">
-                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Penugasan Saat Ini (Jabatan / Proyek) <span class="text-rose-400">*</span></label>
-                            <input type="text" required id="form-penugasan" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-600" placeholder="Sebutkan posisi atau unit kerja saat ini">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Penugasan Saat Ini (Jabatan / Proyek) <span class="text-rose-600">*</span></label>
+                            <input type="text" required id="form-penugasan" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-400" placeholder="Sebutkan posisi atau unit kerja saat ini">
                         </div>
 
                         <div class="sm:col-span-2">
-                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Nama Atasan Langsung (PM / Manager Biro) <span class="text-rose-400">*</span></label>
-                            <input type="text" required id="form-atasan" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-600" placeholder="Masukkan nama atasan Anda">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Atasan Langsung (PM / Manager Biro) <span class="text-rose-600">*</span></label>
+                            <input type="text" required id="form-atasan" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-400" placeholder="Masukkan nama atasan Anda">
                         </div>
                     </div>
                 </div>
 
                 <!-- BAGIAN 2: REQUIREMENT DINAMIS -->
-                <div class="space-y-4 pt-4 border-t border-white/10">
+                <div class="space-y-4 pt-4 border-t border-slate-200">
                     <div class="flex items-center space-x-2 mb-1">
                         <span class="w-1 h-4 bg-gradient-to-b from-rose-500 to-purple-500 rounded-full"></span>
-                        <p class="text-xs font-bold text-slate-200 uppercase tracking-wider">2. Self Assessment Kualifikasi</p>
+                        <p class="text-xs font-bold text-slate-900 uppercase tracking-wider">2. Self Assessment Kualifikasi</p>
                     </div>
-                    <p class="text-[11px] text-slate-400 leading-relaxed italic">Aktifkan ceklist jika Anda memenuhi kualifikasi, lalu tentukan persentase penguasaan Anda melalui slider.</p>
+                    <p class="text-[11px] text-slate-500 leading-relaxed italic">Aktifkan ceklist jika Anda memenuhi kualifikasi, lalu tentukan persentase penguasaan Anda melalui slider.</p>
                     
                     <div id="dynamic-requirement-container" class="space-y-3">
                         <!-- Komponen otomatis dibuat lewat JS -->
@@ -164,28 +170,28 @@
                 </div>
 
                 <!-- BAGIAN 3: ALASAN & DOKUMEN -->
-                <div class="space-y-4 pt-4 border-t border-white/10">
+                <div class="space-y-4 pt-4 border-t border-slate-200">
                     <div class="flex items-center space-x-2 mb-2">
                         <span class="w-1 h-4 bg-gradient-to-b from-rose-500 to-purple-500 rounded-full"></span>
-                        <p class="text-xs font-bold text-slate-200 uppercase tracking-wider">3. Motivasi & Dokumen Pendukung</p>
+                        <p class="text-xs font-bold text-slate-900 uppercase tracking-wider">3. Motivasi & Dokumen Pendukung</p>
                     </div>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Mengapa Anda tertarik menduduki posisi ini? <span class="text-rose-400">*</span></label>
-                            <textarea required id="form-alasan" rows="3" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all resize-none placeholder:text-slate-600" placeholder="Tuliskan alasan profesional Anda..."></textarea>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Mengapa Anda tertarik menduduki posisi ini? <span class="text-rose-600">*</span></label>
+                            <textarea required id="form-alasan" rows="3" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all resize-none placeholder:text-slate-400" placeholder="Tuliskan alasan profesional Anda..."></textarea>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-400 mb-1.5">Link Google Drive / Tautan CV Terupdate <span class="text-rose-400">*</span></label>
-                            <input type="url" required id="form-cv-link" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-600" placeholder="https://drive.google.com/file/d/...">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Link Google Drive / Tautan CV Terupdate <span class="text-rose-600">*</span></label>
+                            <input type="url" required id="form-cv-link" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-400" placeholder="https://drive.google.com/file/d/...">
                         </div>
                     </div>
                 </div>
             </form>
 
             <!-- Tombol Kaki Modal -->
-            <div class="p-6 flex space-x-3 border-t border-white/10 shrink-0 bg-black/20 rounded-b-2xl">
-                <button type="button" onclick="closeModal()" class="w-1/2 bg-white/5 hover:bg-white/10 text-slate-300 font-semibold py-2.5 rounded-xl text-sm border border-white/10 transition-colors">Batal</button>
-                <button type="button" onclick="document.getElementById('screening-form').requestSubmit()" class="w-1/2 bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white font-semibold py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-purple-950/50">Kirim Lamaran</button>
+            <div class="p-6 flex space-x-3 border-t border-slate-200 shrink-0 bg-slate-50 rounded-b-2xl">
+                <button type="button" onclick="closeModal()" class="w-1/2 bg-white hover:bg-slate-100 text-slate-700 font-semibold py-2.5 rounded-xl text-sm border border-slate-300 transition-colors">Batal</button>
+                <button type="button" onclick="document.getElementById('screening-form').requestSubmit()" class="w-1/2 bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white font-semibold py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-purple-950/30">Kirim Lamaran</button>
             </div>
 
         </div>
@@ -193,11 +199,8 @@
 
     <script>
         const SPREADSHEET_ID = '1gd6VUH334-0Kx3HCF2ZBnOyiShoOSaJbmTyvxIlesdU'; 
-        // Mengunci target ke sheet bernama "job"
         const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=job`;
         
-        const GFORM_ANALYTICS_BASE_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScd2Kq6RCW9CEz186an5YQ2TVWPsmcILbrZpsLMonCAIPI-ag';
-
         let currentActiveJob = null;
         let currentActiveCompany = null;
 
@@ -211,25 +214,27 @@
                 slider.disabled = false;
                 slider.value = 50; 
                 indicator.innerText = "50%";
-                indicator.classList.remove('text-slate-600');
-                indicator.classList.add('text-rose-400');
+                indicator.classList.remove('text-slate-400');
+                indicator.classList.add('text-rose-600');
                 sliderWrapper.classList.remove('opacity-30');
             } else {
                 slider.disabled = true;
                 slider.value = 0; 
                 indicator.innerText = "0%";
-                indicator.classList.remove('text-rose-400');
-                indicator.classList.add('text-slate-600');
+                indicator.classList.remove('text-rose-600');
+                indicator.classList.add('text-slate-400');
                 sliderWrapper.classList.add('opacity-30');
             }
         }
 
-        function openApplyModal(jabatan, perusahaan, rawRequirement) {
+        // Fungsi Modal Baru: Menerima parameter Aktivitas Utama untuk ditampilkan penuh
+        function openApplyModal(jabatan, perusahaan, rawRequirement, aktivitas) {
             currentActiveJob = jabatan;
             currentActiveCompany = perusahaan;
             
             document.getElementById('modal-job-title').innerText = jabatan;
             document.getElementById('modal-job-company').innerText = perusahaan;
+            document.getElementById('modal-job-aktivitas').innerText = aktivitas;
             
             const reqContainer = document.getElementById('dynamic-requirement-container');
             reqContainer.innerHTML = ''; 
@@ -241,7 +246,7 @@
                 const sliderId = `slider-val-${index}`;
                 
                 const elementHTML = `
-                    <div class="p-3.5 bg-slate-100/80 border border-slate-200 rounded-xl space-y-2.5 transition-all">
+                    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5 transition-all">
                         <label class="flex items-start cursor-pointer group">
                             <input type="checkbox" id="${uniqueId}-check" value="${reqText}" 
                                    onchange="toggleRequirementSlider(${index})"
@@ -252,7 +257,7 @@
                             <input type="range" min="0" max="100" value="0" id="${uniqueId}-range" disabled
                                    oninput="document.getElementById('${sliderId}').innerText = this.value + '%'"
                                    class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-rose-500 disabled:cursor-not-allowed">
-                            <span class="text-xs font-bold text-slate-500 min-w-[35px] text-right transition-colors" id="${sliderId}">0%</span>
+                            <span class="text-xs font-bold text-slate-400 min-w-[35px] text-right transition-colors" id="${sliderId}">0%</span>
                         </div>
                     </div>
                 `;
@@ -280,69 +285,65 @@
             }, 200);
         }
 
-        // Tempel URL Aplikasi Web dari Google Apps Script di sini
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyb2UyLIbmhwKeoP-mAfpq5sTvO5WyG1rkbVVyoEsalmOd3IoUDJwu9VEvqanshSuX6_w/exec'; 
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyb2UyLIbmhwKeoP-mAfpq5sTvO5WyG1rkbVVyoEsalmOd3IoUDJwu9VEvqanshSuX6_w/exec'; 
 
-function handleFormSubmit(event) {
-    event.preventDefault();
-    
-    const nama = document.getElementById('form-nama').value;
-    const phone = document.getElementById('form-phone').value;
-    const penugasan = document.getElementById('form-penugasan').value;
-    const atasan = document.getElementById('form-atasan').value;
-    const durasi = document.getElementById('form-durasi').value;
-    const alasan = document.getElementById('form-alasan').value;
-    const cvLink = document.getElementById('form-cv-link').value;
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            const nama = document.getElementById('form-nama').value;
+            const phone = document.getElementById('form-phone').value;
+            const penugasan = document.getElementById('form-penugasan').value;
+            const atasan = document.getElementById('form-atasan').value;
+            const durasi = document.getElementById('form-durasi').value;
+            const alasan = document.getElementById('form-alasan').value;
+            const cvLink = document.getElementById('form-cv-link').value;
 
-    let assessmentSummary = [];
-    const container = document.getElementById('dynamic-requirement-container');
-    const items = container.children.length;
+            let assessmentSummary = [];
+            const container = document.getElementById('dynamic-requirement-container');
+            const items = container.children.length;
 
-    for(let i = 0; i < items; i++) {
-        const isChecked = document.getElementById(`req-item-${i}-check`).checked;
-        const reqName = document.getElementById(`req-item-${i}-check`).value;
-        const score = document.getElementById(`req-item-${i}-range`).value;
-        
-        assessmentSummary.push(`${reqName}: ${score}% (${isChecked ? 'Sesuai' : 'Tidak Sesuai/Tidak Diceklis'})`);
-    }
-    const assessmentText = assessmentSummary.join(', ');
-    const alasanDanAssessment = `[POSISI]: ${currentActiveJob} (${currentActiveCompany}) | [ASSESSMENT]: ${assessmentText} | [ALASAN]: ${alasan}`;
+            for(let i = 0; i < items; i++) {
+                const isChecked = document.getElementById(`req-item-${i}-check`).checked;
+                const reqName = document.getElementById(`req-item-${i}-check`).value;
+                const score = document.getElementById(`req-item-${i}-range`).value;
+                
+                assessmentSummary.push(`${reqName}: ${score}% (${isChecked ? 'Sesuai' : 'Tidak Sesuai/Tidak Diceklis'})`);
+            }
+            const assessmentText = assessmentSummary.join(', ');
+            const alasanDanAssessment = `[POSISI]: ${currentActiveJob} (${currentActiveCompany}) | [ASSESSMENT]: ${assessmentText} | [ALASAN]: ${alasan}`;
 
-    // Membungkus data ke JSON standar
-    const payload = {
-        nama: nama,
-        phone: phone,
-        penugasan: penugasan,
-        atasan: atasan,
-        durasi: durasi,
-        alasanDanAssessment: alasanDanAssessment,
-        cvLink: cvLink
-    };
+            const payload = {
+                nama: nama,
+                phone: phone,
+                penugasan: penugasan,
+                atasan: atasan,
+                durasi: durasi,
+                alasanDanAssessment: alasanDanAssessment,
+                cvLink: cvLink
+            };
 
-    // Mengirim data langsung ke Google Sheets secara background
-    fetch(WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors', // Aman dari cekkal CORS
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(() => {
-        alert(`Aplikasi pendaftaran posisi "${currentActiveJob}" berhasil dikirim langsung ke database!`);
-        closeModal();
-    })
-    .catch(err => {
-        console.error(err);
-        alert('Terjadi kesalahan saat mengirim data.');
-    });
-}
+            fetch(WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                alert(`Aplikasi pendaftaran posisi "${currentActiveJob}" berhasil dikirim langsung ke database!`);
+                closeModal();
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Terjadi kesalahan saat mengirim data.');
+            });
+        }
+
         async function fetchJobs() {
-            // Mengambil elemen secara dinamis saat fungsi berjalan
             let container = document.getElementById('job-container') || document.getElementById('jobs-container');
             let skeleton = document.getElementById('loading-state') || document.getElementById('skeleton-loader');
             
-            // Pengaman ekstra: Jika container masih tidak ditemukan, cari ulang setelah 100ms
             if (!container) {
                 setTimeout(fetchJobs, 100);
                 return;
@@ -359,13 +360,11 @@ function handleFormSubmit(event) {
                     return;
                 }
 
-                // Ambil header dengan aman, pastikan diubah ke string
                 const headers = data.table.cols.map(col => {
                     if (!col || !col.label) return '';
                     return String(col.label).toLowerCase().trim();
                 });
 
-                // Deteksi indeks kolom berdasarkan kata kunci pencarian yang lebih fleksibel
                 const idxJabatan = headers.findIndex(h => h.includes('jabatan') || h.includes('posisi'));
                 const idxDepartemen = headers.findIndex(h => h.includes('departemen') || h.includes('divisi'));
                 const idxPenugasan = headers.findIndex(h => h.includes('penugasan') || h.includes('tipe'));
@@ -384,21 +383,19 @@ function handleFormSubmit(event) {
                     const aktivitas = (idxAktivitas !== -1 && row.c[idxAktivitas]) ? row.c[idxAktivitas].v : 'Detail aktivitas belum diisi.';
                     const requirement = (idxRequirement !== -1 && row.c[idxRequirement]) ? row.c[idxRequirement].v : '';
                     
-                    // Jika kolom status tidak ditemukan atau kosong di Google Sheets, default-nya diset 'Open'
                     let status = 'Open';
                     if (idxStatus !== -1 && row.c[idxStatus] && row.c[idxStatus].v) {
                         status = String(row.c[idxStatus].v).trim();
                     }
 
-                    // Logika warna & teks status dinamis
                     const isOpen = status.toLowerCase() === 'open';
                     const statusText = isOpen ? 'Open' : 'Closed';
                     const statusDotColor = isOpen ? 'bg-emerald-500 group-hover:bg-emerald-300' : 'bg-rose-500 group-hover:bg-rose-300';
                     const statusTextColor = isOpen ? 'text-emerald-600 group-hover:text-emerald-300' : 'text-rose-600 group-hover:text-rose-300';
                     
-                    // Logika tampilan tombol apply berdasarkan status lowongan
+                    // Mengirimkan parameter aktivitas ke openApplyModal agar terbaca penuh
                     const buttonHTML = isOpen 
-                        ? `<button onclick="openApplyModal('${jabatan.replace(/'/g, "\\'")}', '${departemen.replace(/'/g, "\\'")}', '${requirement.replace(/'/g, "\\'")}')"
+                        ? `<button onclick="openApplyModal('${jabatan.replace(/'/g, "\\'")}', '${departemen.replace(/'/g, "\\'")}', '${requirement.replace(/'/g, "\\'")}', '${aktivitas.replace(/'/g, "\\'")}')"
                               class="inline-flex items-center justify-center bg-red-800 hover:bg-red-900 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm group-hover:bg-white group-hover:text-red-900 transition-all">
                               Apply Position
                            </button>`
@@ -409,8 +406,6 @@ function handleFormSubmit(event) {
                             <div>
                                 <div class="flex justify-between items-center mb-4">
                                     <span class="text-[10px] font-bold bg-slate-200/60 text-slate-700 px-2.5 py-1 rounded-lg border border-white/20 uppercase tracking-wider group-hover:bg-red-900 group-hover:text-red-200">${penugasan}</span>
-                                    
-                                    <!-- Indikator Status Dinamis -->
                                     <div class="flex items-center space-x-1.5">
                                         <span class="w-1.5 h-1.5 rounded-full animate-pulse ${statusDotColor}"></span>
                                         <span class="text-[10px] font-bold tracking-wide uppercase ${statusTextColor}">${statusText}</span>
@@ -432,7 +427,6 @@ function handleFormSubmit(event) {
                                 </div>
                             </div>
                             
-                            <!-- Tombol Dinamis -->
                             <div class="mt-6 pt-4 border-t border-slate-200/60 flex items-center justify-end group-hover:border-red-700">
                                 ${buttonHTML}
                             </div>
