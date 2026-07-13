@@ -11,33 +11,44 @@
         
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
-        .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
 
+        /* Liquid Glass - Latar belakang putih transparan tipis yang bersih */
         .glass-card {
-            background: rgba(255, 255, 255, 0.07);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
         }
+        
+        /* Efek Hover Satu Card Utuh */
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.75);
+            border-color: rgba(153, 27, 27, 0.4); /* Border maroon tipis saat di-hover */
+            box-shadow: 0 12px 40px 0 rgba(153, 27, 27, 0.08);
+            transform: translateY(-2px);
+        }
+
         .glass-modal {
-            background: rgba(25, 10, 25, 0.75);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
+
         .glass-input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #ffffff;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #1e293b;
         }
         .glass-input:focus {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(236, 72, 153, 0.5);
+            background: #ffffff;
+            border-color: #991b1b; /* Maroon */
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-rose-950 via-slate-950 to-purple-950 text-slate-100 antialiased min-h-screen flex flex-col">
+<body class="bg-gradient-to-br from-slate-50 via-slate-100 to-zinc-200 text-slate-800 antialiased min-h-screen flex flex-col">
 
     <!-- Header -->
     <header class="bg-black/20 backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
@@ -357,32 +368,34 @@ function handleFormSubmit(event) {
                     const requirement = (idxRequirement !== -1 && row.c[idxRequirement]) ? row.c[idxRequirement].v : 'Kualifikasi umum';
 
                     const cardHTML = `
-                        <div class="glass-card rounded-2xl p-6 hover:border-white/30 transition-all duration-300 flex flex-col justify-between group">
+                        <div class="glass-card rounded-2xl p-6 transition-all duration-300 flex flex-col justify-between group cursor-pointer">
                             <div>
                                 <div class="flex justify-between items-center mb-4">
-                                    <span class="text-[10px] font-bold bg-white/10 text-rose-300 px-2.5 py-1 rounded-lg border border-white/5 uppercase tracking-wider">${penugasan}</span>
+                                    <span class="text-[10px] font-bold bg-slate-200/60 text-slate-700 px-2.5 py-1 rounded-lg border border-white/20 uppercase tracking-wider">${penugasan}</span>
                                     <div class="flex items-center space-x-1.5">
-                                        <span class="w-1.5 h-1.5 bg-rose-400 rounded-full animate-pulse"></span>
-                                        <span class="text-[10px] font-bold text-rose-400 tracking-wide uppercase">Open</span>
+                                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                                        <span class="text-[10px] font-bold text-emerald-600 tracking-wide uppercase">Open</span>
                                     </div>
                                 </div>
-                                <h3 class="text-lg font-bold text-white mb-0.5 group-hover:text-rose-300 transition-colors line-clamp-1">${jabatan}</h3>
-                                <p class="text-xs text-slate-400 font-medium mb-4">${departemen}</p>
+                                <!-- Judul tidak lagi berubah sendiri, melainkan mengikuti hover satu card -->
+                                <h3 class="text-base font-bold text-slate-900 mb-0.5 group-hover:text-red-800 transition-colors line-clamp-1">${jabatan}</h3>
+                                <p class="text-xs text-slate-500 font-medium mb-4">${departemen}</p>
                                 
-                                <div class="space-y-3 border-t border-white/5 pt-3">
+                                <div class="space-y-3 border-t border-slate-200/60 pt-3">
                                     <div>
-                                        <h4 class="text-[11px] font-bold text-purple-300 uppercase tracking-wide">Aktivitas Utama:</h4>
-                                        <p class="text-xs text-slate-300 line-clamp-3 mt-0.5 leading-relaxed">${aktivitas}</p>
+                                        <h4 class="text-[11px] font-bold text-red-800 uppercase tracking-wide">Aktivitas Utama:</h4>
+                                        <p class="text-xs text-slate-600 line-clamp-3 mt-0.5 leading-relaxed">${aktivitas}</p>
                                     </div>
                                     <div>
-                                        <h4 class="text-[11px] font-bold text-rose-300 uppercase tracking-wide">Kualifikasi:</h4>
-                                        <p class="text-xs text-slate-400 line-clamp-2 mt-0.5 leading-relaxed">${requirement.replace(/\|/g, ' • ')}</p>
+                                        <h4 class="text-[11px] font-bold text-slate-700 uppercase tracking-wide">Kualifikasi:</h4>
+                                        <p class="text-xs text-slate-500 line-clamp-2 mt-0.5 leading-relaxed">${requirement.replace(/\|/g, ' • ')}</p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="mt-6 pt-4 border-t border-white/5 flex items-center justify-end">
+                            <div class="mt-6 pt-4 border-t border-slate-200/60 flex items-center justify-end">
+                                <!-- Tombol menggunakan warna solid Maroon -->
                                 <button onclick="openApplyModal('${jabatan.replace(/'/g, "\\'")}', '${departemen.replace(/'/g, "\\'")}', '${requirement.replace(/'/g, "\\'")}')"
-                                   class="inline-flex items-center justify-center bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md shadow-purple-950/50">
+                                   class="inline-flex items-center justify-center bg-red-800 hover:bg-red-900 text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm shadow-red-900/10">
                                     Apply Position
                                 </button>
                             </div>
