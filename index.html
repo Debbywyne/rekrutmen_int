@@ -349,31 +349,40 @@ function handleFormSubmit(event) {
                 
                 if (!data.table || !data.table.rows || data.table.rows.length === 0) {
                     container.innerHTML = '<p class="text-center text-slate-500 py-8">Belum ada lowongan yang tersedia saat ini.</p>';
-                    skeleton.classList.add('hidden');
+                    if (skeleton) skeleton.classList.add('hidden');
                     return;
                 }
 
-                const headers = data.table.cols.map(col => col ? col.label : '');
-                const idxJabatan = headers.findIndex(h => h && h.toLowerCase().includes('jabatan') || h.toLowerCase().includes('posisi'));
-                const idxDepartemen = headers.findIndex(h => h && h.toLowerCase().includes('departemen') || h.toLowerCase().includes('divisi'));
-                const idxPenugasan = headers.findIndex(h => h && h.toLowerCase().includes('penugasan') || h.toLowerCase().includes('tipe') || h.toLowerCase().includes('status penugasan'));
-                const idxAktivitas = headers.findIndex(h => h && h.toLowerCase().includes('aktivitas'));
-                const idxRequirement = headers.findIndex(h => h && h.toLowerCase().includes('kualifikasi') || h.toLowerCase().includes('requirement'));
-                
-                // Tambahan indeks otomatis untuk mendeteksi kolom Status
-                const idxStatus = headers.findIndex(h => h && h.toLowerCase() === 'status');
+                // Ambil header dengan aman, pastikan diubah ke string
+                const headers = data.table.cols.map(col => {
+                    if (!col || !col.label) return '';
+                    return String(col.label).toLowerCase().trim();
+                });
+
+                // Deteksi indeks kolom berdasarkan kata kunci pencarian yang lebih fleksibel
+                const idxJabatan = headers.findIndex(h => h.includes('jabatan') || h.includes('posisi'));
+                const idxDepartemen = headers.findIndex(h => h.includes('departemen') || h.includes('divisi'));
+                const idxPenugasan = headers.findIndex(h => h.includes('penugasan') || h.includes('tipe'));
+                const idxAktivitas = headers.findIndex(h => h.includes('aktivitas'));
+                const idxRequirement = headers.findIndex(h => h.includes('kualifikasi') || h.includes('requirement'));
+                const idxStatus = headers.findIndex(h => h.includes('status'));
 
                 let htmlContent = '';
 
                 data.table.rows.forEach(row => {
+                    if (!row || !row.c) return;
+
                     const jabatan = (idxJabatan !== -1 && row.c[idxJabatan]) ? row.c[idxJabatan].v : 'Posisi Tidak Terbaca';
                     const departemen = (idxDepartemen !== -1 && row.c[idxDepartemen]) ? row.c[idxDepartemen].v : '-';
                     const penugasan = (idxPenugasan !== -1 && row.c[idxPenugasan]) ? row.c[idxPenugasan].v : 'Internal';
                     const aktivitas = (idxAktivitas !== -1 && row.c[idxAktivitas]) ? row.c[idxAktivitas].v : 'Detail aktivitas belum diisi.';
                     const requirement = (idxRequirement !== -1 && row.c[idxRequirement]) ? row.c[idxRequirement].v : '';
                     
-                    // Membaca kolom Status dari Google Sheets, default 'Open' jika kosong/tidak ada kolomnya
-                    const status = (idxStatus !== -1 && row.c[idxStatus]) ? row.c[idxStatus].v : 'Open';
+                    // Jika kolom status tidak ditemukan atau kosong di Google Sheets, default-nya diset 'Open'
+                    let status = 'Open';
+                    if (idxStatus !== -1 && row.c[idxStatus] && row.c[idxStatus].v) {
+                        status = String(row.c[idxStatus].v).trim();
+                    }
 
                     // Logika warna & teks status dinamis
                     const isOpen = status.toLowerCase() === 'open';
@@ -428,9 +437,9 @@ function handleFormSubmit(event) {
                 container.innerHTML = htmlContent;
             } catch (error) {
                 console.error('Error fetching jobs:', error);
-                container.innerHTML = '<p class="text-center text-rose-600 py-8">Gagal memuat lowongan kerja. Pastikan link Google Sheet sudah benar dan di-publish ke web.</p>';
+                container.innerHTML = '<p class="text-center text-rose-600 py-8">Gagal memuat lowongan kerja. Silakan coba muat ulang halaman.</p>';
             } finally {
-                skeleton.classList.add('hidden');
+                if (skeleton) skeleton.classList.add('hidden');
             }
         }
 
