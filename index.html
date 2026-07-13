@@ -338,9 +338,14 @@ function handleFormSubmit(event) {
     });
 }
 
+       t
+
         async function fetchJobs() {
-            const container = document.getElementById('jobs-container');
-            const skeleton = document.getElementById('skeleton-loader');
+            // DISESUAIKAN: Menghapus huruf 's' agar cocok dengan id="job-container" Anda
+            const container = document.getElementById('job-container'); 
+            
+            // DISESUAIKAN: Mengganti nama agar cocok dengan id="loading-state" Anda
+            const skeleton = document.getElementById('loading-state');
             
             try {
                 const response = await fetch(SHEET_URL);
