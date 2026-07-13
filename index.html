@@ -13,25 +13,32 @@
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
 
-        /* Liquid Glass - Latar belakang putih transparan tipis yang bersih */
+        /* Kondisi Normal: Efek Kaca Blur (Semi-Transparent Frosted Glass) */
         .glass-card {
-            background: rgba(255, 255, 255, 0.45);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.03);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        /* Efek Hover Satu Card Utuh */
+        /* Kondisi Hover: Mengisi warna (Full Fill Maroon Liquid) dan memancarkan efek kaca bercahaya */
         .glass-card:hover {
-            background: rgba(255, 255, 255, 0.75);
-            border-color: rgba(153, 27, 27, 0.4); /* Border maroon tipis saat di-hover */
-            box-shadow: 0 12px 40px 0 rgba(153, 27, 27, 0.08);
-            transform: translateY(-2px);
+            background: rgba(153, 27, 27, 0.95); /* Maroon solid dengan transparansi liquid halus */
+            backdrop-filter: blur(10px);
+            border-color: rgba(153, 27, 27, 1);
+            box-shadow: 0 20px 40px 0 rgba(153, 27, 27, 0.25);
+            transform: translateY(-5px);
+        }
+
+        /* Sinkronisasi transisi warna teks di dalam kartu saat di-hover */
+        .glass-card * {
+            transition: color 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
         }
 
         .glass-modal {
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
             border: 1px solid rgba(255, 255, 255, 0.8);
@@ -44,7 +51,7 @@
         }
         .glass-input:focus {
             background: #ffffff;
-            border-color: #991b1b; /* Maroon */
+            border-color: #991b1b;
         }
     </style>
 </head>
@@ -65,11 +72,14 @@
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-6 py-16 flex-1 w-full">
-        <div class="max-w-2xl mb-14">
-            <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-rose-200 to-purple-200 tracking-tight sm:text-4xl mb-3">Eksplorasi Peluang Karier Internal</h1>
-            <p class="text-base text-slate-400 leading-relaxed">Kembangkan potensimu!.</p>
-        </div>
+    <!-- Main Content -->
+<main class="max-w-6xl mx-auto px-6 py-16 flex-1 w-full">
+    <div class="max-w-2xl mb-14">
+        <!-- Headline: Menggunakan warna Maroon tegas agar kontras di latar belakang terang -->
+        <h1 class="text-3xl font-extrabold text-red-950 tracking-tight sm:text-4xl mb-3">Eksplorasi Peluang Karier Internal</h1>
+        <!-- Subheadline: Menggunakan abu-abu slate gelap agar teks mudah terbaca -->
+        <p class="text-base text-slate-600 leading-relaxed">Kembangkan potensi dirimu!</p>
+    </div>
 
         <!-- Container Lowongan -->
         <div id="job-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -368,34 +378,33 @@ function handleFormSubmit(event) {
                     const requirement = (idxRequirement !== -1 && row.c[idxRequirement]) ? row.c[idxRequirement].v : 'Kualifikasi umum';
 
                     const cardHTML = `
-                        <div class="glass-card rounded-2xl p-6 transition-all duration-300 flex flex-col justify-between group cursor-pointer">
+                        <div class="glass-card rounded-2xl p-6 flex flex-col justify-between group cursor-pointer">
                             <div>
                                 <div class="flex justify-between items-center mb-4">
-                                    <span class="text-[10px] font-bold bg-slate-200/60 text-slate-700 px-2.5 py-1 rounded-lg border border-white/20 uppercase tracking-wider">${penugasan}</span>
+                                    <span class="text-[10px] font-bold bg-slate-200/60 text-slate-700 px-2.5 py-1 rounded-lg border border-white/20 uppercase tracking-wider group-hover:bg-red-900 group-hover:text-red-200">${penugasan}</span>
                                     <div class="flex items-center space-x-1.5">
-                                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                                        <span class="text-[10px] font-bold text-emerald-600 tracking-wide uppercase">Open</span>
+                                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse group-hover:bg-emerald-300"></span>
+                                        <span class="text-[10px] font-bold text-emerald-600 tracking-wide uppercase group-hover:text-emerald-300">Open</span>
                                     </div>
                                 </div>
-                                <!-- Judul tidak lagi berubah sendiri, melainkan mengikuti hover satu card -->
-                                <h3 class="text-base font-bold text-slate-900 mb-0.5 group-hover:text-red-800 transition-colors line-clamp-1">${jabatan}</h3>
-                                <p class="text-xs text-slate-500 font-medium mb-4">${departemen}</p>
+                                <h3 class="text-base font-bold text-slate-900 mb-0.5 group-hover:text-white line-clamp-1">${jabatan}</h3>
+                                <p class="text-xs text-slate-500 font-medium mb-4 group-hover:text-red-200">${departemen}</p>
                                 
-                                <div class="space-y-3 border-t border-slate-200/60 pt-3">
+                                <div class="space-y-3 border-t border-slate-200/60 pt-3 group-hover:border-red-700">
                                     <div>
-                                        <h4 class="text-[11px] font-bold text-red-800 uppercase tracking-wide">Aktivitas Utama:</h4>
-                                        <p class="text-xs text-slate-600 line-clamp-3 mt-0.5 leading-relaxed">${aktivitas}</p>
+                                        <h4 class="text-[11px] font-bold text-red-800 uppercase tracking-wide group-hover:text-red-200">Aktivitas Utama:</h4>
+                                        <p class="text-xs text-slate-600 line-clamp-3 mt-0.5 leading-relaxed group-hover:text-slate-100">${aktivitas}</p>
                                     </div>
                                     <div>
-                                        <h4 class="text-[11px] font-bold text-slate-700 uppercase tracking-wide">Kualifikasi:</h4>
-                                        <p class="text-xs text-slate-500 line-clamp-2 mt-0.5 leading-relaxed">${requirement.replace(/\|/g, ' • ')}</p>
+                                        <h4 class="text-[11px] font-bold text-slate-700 uppercase tracking-wide group-hover:text-red-200">Kualifikasi:</h4>
+                                        <p class="text-xs text-slate-500 line-clamp-2 mt-0.5 leading-relaxed group-hover:text-slate-200">${requirement.replace(/\|/g, ' • ')}</p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="mt-6 pt-4 border-t border-slate-200/60 flex items-center justify-end">
-                                <!-- Tombol menggunakan warna solid Maroon -->
+                            <div class="mt-6 pt-4 border-t border-slate-200/60 flex items-center justify-end group-hover:border-red-700">
+                                <!-- Tombol saat card di-hover akan berubah warna putih agar kontras -->
                                 <button onclick="openApplyModal('${jabatan.replace(/'/g, "\\'")}', '${departemen.replace(/'/g, "\\'")}', '${requirement.replace(/'/g, "\\'")}')"
-                                   class="inline-flex items-center justify-center bg-red-800 hover:bg-red-900 text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition-all shadow-sm shadow-red-900/10">
+                                   class="inline-flex items-center justify-center bg-red-800 hover:bg-red-900 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm group-hover:bg-white group-hover:text-red-900">
                                     Apply Position
                                 </button>
                             </div>
