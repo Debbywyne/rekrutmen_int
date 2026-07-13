@@ -60,6 +60,7 @@
                     profileScreen.classList.remove('hidden');
                     mainContent.classList.add('hidden');
                     document.getElementById('setup-nama').value = user.displayName || '';
+                    initDefaultCertifications('setup');
                 }
             } else {
                 loginScreen.classList.remove('hidden');
@@ -119,52 +120,74 @@
         </div>
     </div>
 
-    <!-- SCREEN 1.5: MANDATORY PROFILE SETUP -->
+    <!-- SCREEN 1.5: MANDATORY PROFILE SETUP (TWO-PAGES) -->
     <div id="profile-setup-screen" class="fixed inset-0 z-[90] hidden flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-950 to-black p-4">
-        <div class="bg-white/95 backdrop-blur-md p-8 rounded-2xl max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
-            <h2 class="text-xl font-bold text-slate-900 tracking-tight">Lengkapi Profil Diri Anda</h2>
-            <p class="text-xs text-slate-500 mt-1 mb-6">Informasi ini akan otomatis dilampirkan pada setiap posisi yang Anda lamar.</p>
+        <div class="bg-white/95 backdrop-blur-md p-8 rounded-2xl max-w-xl w-full shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll">
+            <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-3">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 tracking-tight">Lengkapi Profil Diri</h2>
+                    <p class="text-xs text-slate-500 mt-0.5" id="setup-step-indicator">Halaman 1 dari 2: Biodata Diri</p>
+                </div>
+            </div>
             
-            <form id="profile-setup-form" onsubmit="saveUserProfile(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Lengkap (Sesuai KTP)</label>
-                    <input type="text" required id="setup-nama" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+            <form id="profile-setup-form" onsubmit="handleProfileSetupSubmit(event)">
+                <!-- PAGE 1: Biodata Diri -->
+                <div id="setup-page-1" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Lengkap (Sesuai KTP)</label>
+                        <input type="text" required id="setup-nama" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Apakah Saudara/i saat ini merupakan pegawai ADHI?</label>
+                        <select required id="setup-is-adhi" onchange="toggleNPPVisibility('setup')" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                            <option value="" disabled selected>Pilih salah satu</option>
+                            <option value="Ya">Ya</option>
+                            <option value="Tidak">Tidak</option>
+                        </select>
+                    </div>
+                    <div id="setup-npp-container" class="hidden">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Silahkan isi NPP Saudara/i <span class="text-rose-600">*</span></label>
+                        <input type="text" id="setup-npp" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">No. WhatsApp Aktif</label>
+                        <input type="tel" required id="setup-phone" placeholder="Contoh: 0812345678" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Penugasan Saat Ini (Jabatan - Unit Kerja - Kantor/Proyek)</label>
+                        <input type="text" required id="setup-penugasan" placeholder="Sebutkan posisi Anda saat ini" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Atasan Langsung</label>
+                        <input type="text" required id="setup-atasan" placeholder="Nama PM / Manager" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Durasi di Penugasan Sekarang</label>
+                        <input type="text" required id="setup-durasi" placeholder="Contoh: 1 Tahun" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                    </div>
+                    <div class="pt-2 border-t border-slate-200">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Link Google Drive / Tautan CV Terupdate <span class="text-[10px] text-rose-600">(Wajib awalan https://)</span class="text-rose-600"></label>
+                        <input type="url" pattern="https://.*" required id="setup-cv" placeholder="https://drive.google.com/file/d/..." class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                    </div>
+                    <button type="button" onclick="navigatePage('setup', 2)" class="w-full mt-4 bg-slate-900 text-white font-semibold py-3 px-4 rounded-xl text-sm transition-all shadow-md hover:bg-slate-800">
+                        Lanjut ke Kompetensi Diri
+                    </button>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Apakah saudara/i pegawai ADHI?</label>
-                    <select required id="setup-is-adhi" onchange="toggleNPPVisibility('setup')" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
-                        <option value="" disabled selected>Pilih salah satu</option>
-                        <option value="Ya">Ya</option>
-                        <option value="Tidak">Tidak</option>
-                    </select>
+
+                <!-- PAGE 2: Kompetensi Diri -->
+                <div id="setup-page-2" class="hidden space-y-4">
+                    <p class="text-xs text-slate-500 mb-2 font-medium">Silahkan isi informasi sertifikasi yang Anda miliki (Link wajib menggunakan awalan https://):</p>
+                    <div id="setup-certifications-container" class="space-y-4"></div>
+                    
+                    <button type="button" onclick="addCertificationField('setup')" class="w-full py-2 border-2 border-dashed border-slate-300 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition-colors">
+                        + Tambah Sertifikasi
+                    </button>
+                    
+                    <div class="flex space-x-3 pt-4 border-t border-slate-200">
+                        <button type="button" onclick="navigatePage('setup', 1)" class="w-1/2 bg-white hover:bg-slate-100 text-slate-700 font-semibold py-2.5 rounded-xl text-sm border border-slate-300 transition-colors">Kembali</button>
+                        <button type="submit" class="w-1/2 bg-gradient-to-r from-rose-600 to-purple-600 text-white font-semibold py-2.5 rounded-xl text-sm shadow-lg hover:shadow-purple-950/30">Simpan & Selesai</button>
+                    </div>
                 </div>
-                <div id="setup-npp-container" class="hidden">
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Silahkan isi NPP Saudara/i <span class="text-rose-600">*</span></label>
-                    <input type="text" id="setup-npp" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">No. WhatsApp Aktif</label>
-                    <input type="tel" required id="setup-phone" placeholder="Contoh: 0812345678" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Penugasan Saat Ini (Jabatan - Unit Kerja - Kantor/Proyek)</label>
-                    <input type="text" required id="setup-penugasan" placeholder="Sebutkan posisi Anda saat ini" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Atasan Langsung</label>
-                    <input type="text" required id="setup-atasan" placeholder="Nama PM / Manager" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Durasi di Penugasan Sekarang</label>
-                    <input type="text" required id="setup-durasi" placeholder="Contoh: 1 Tahun" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
-                </div>
-                <div class="pt-2 border-t border-slate-200">
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Link Google Drive / Tautan CV Terupdate</label>
-                    <input type="url" required id="setup-cv" placeholder="https://drive.google.com/file/d/..." class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
-                </div>
-                <button type="submit" class="w-full mt-4 bg-gradient-to-r from-rose-600 to-purple-600 text-white font-semibold py-3 px-4 rounded-xl text-sm transition-all shadow-lg hover:shadow-purple-950/30">
-                    Simpan & Lanjutkan
-                </button>
             </form>
         </div>
     </div>
@@ -182,12 +205,9 @@
                         <p class="text-[10px] text-slate-400 font-medium">Logged in as:</p>
                         <p id="user-email" class="text-xs text-white font-semibold">loading...</p>
                     </div>
-                    
-                    <!-- Tombol Profil Diri -->
                     <button onclick="openEditProfileModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-white font-semibold px-4 py-2 rounded-lg border border-slate-700 transition-colors">
                         Profil Diri
                     </button>
-                    
                     <button onclick="logout()" class="text-xs bg-white/10 hover:bg-rose-900/40 text-slate-200 hover:text-white px-3 py-2 rounded-lg border border-white/10 transition-colors">Logout</button>
                 </div>
             </div>
@@ -198,7 +218,6 @@
                 <h1 class="text-3xl font-extrabold text-red-950 tracking-tight sm:text-4xl mb-3">Eksplorasi Peluang Karier Internal</h1>
                 <p class="text-base text-slate-600 leading-relaxed">Kembangkan potensi dirimu!</p>
             </div>
-
             <div id="job-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div id="loading-state" class="col-span-full text-center py-16 glass-card rounded-2xl">
                     <div class="inline-block animate-spin rounded-full h-7 w-7 border-3 border-rose-500 border-t-transparent mb-3"></div>
@@ -208,56 +227,75 @@
         </main>
     </div>
 
-    <!-- MODAL EDIT PROFIL DIRI -->
+    <!-- MODAL EDIT PROFIL DIRI (TWO-PAGES) -->
     <div id="edit-profile-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-[80] p-4 transition-all duration-300">
-        <div class="glass-modal rounded-2xl max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll p-6 transform transition-all scale-95 opacity-0 duration-200" id="edit-profile-box">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-bold text-slate-900">Perbarui Profil Diri</h3>
+        <div class="glass-modal rounded-2xl max-w-xl w-full shadow-2xl max-h-[90vh] overflow-y-auto custom-scroll p-6 transform transition-all scale-95 opacity-0 duration-200" id="edit-profile-box">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">Perbarui Profil Diri</h3>
+                    <p class="text-xs text-slate-500 mt-0.5" id="edit-step-indicator">Halaman 1 dari 2: Biodata Diri</p>
+                </div>
                 <button onclick="closeEditProfileModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             
-            <form id="edit-profile-form" onsubmit="saveUpdatedProfile(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Lengkap (Sesuai KTP)</label>
-                    <input type="text" required id="edit-nama" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+            <form id="edit-profile-form" onsubmit="handleProfileUpdateSubmit(event)">
+                <!-- PAGE 1: Biodata Diri -->
+                <div id="edit-page-1" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Lengkap (Sesuai KTP)</label>
+                        <input type="text" required id="edit-nama" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Apakah Saudara/i saat ini merupakan pegawai ADHI?</label>
+                        <select required id="edit-is-adhi" onchange="toggleNPPVisibility('edit')" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                            <option value="Ya">Ya</option>
+                            <option value="Tidak">Tidak</option>
+                        </select>
+                    </div>
+                    <div id="edit-npp-container" class="hidden">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Silahkan isi NPP Saudara/i <span class="text-rose-600">*</span></label>
+                        <input type="text" id="edit-npp" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">No. WhatsApp Aktif</label>
+                        <input type="tel" required id="edit-phone" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Penugasan Saat Ini (Jabatan - Unit Kerja - Kantor/Proyek)</label>
+                        <input type="text" required id="edit-penugasan" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Atasan Langsung</label>
+                        <input type="text" required id="edit-atasan" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Durasi di Penugasan Sekarang</label>
+                        <input type="text" required id="edit-durasi" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                    </div>
+                    <div class="pt-2 border-t border-slate-200">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Link Google Drive / Tautan CV Terupdate <span class="text-[10px] text-rose-600">(Wajib awalan https://)</span></label>
+                        <input type="url" pattern="https://.*" required id="edit-cv" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                    </div>
+                    <button type="button" onclick="navigatePage('edit', 2)" class="w-full mt-4 bg-slate-900 text-white font-semibold py-3 px-4 rounded-xl text-sm transition-all shadow-md hover:bg-slate-800">
+                        Lanjut ke Kompetensi Diri
+                    </button>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Apakah saudara/i pegawai ADHI?</label>
-                    <select required id="edit-is-adhi" onchange="toggleNPPVisibility('edit')" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
-                        <option value="" disabled>Pilih salah satu</option>
-                        <option value="Ya">Ya</option>
-                        <option value="Tidak">Tidak</option>
-                    </select>
-                </div>
-                <div id="edit-npp-container" class="hidden">
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Silahkan isi NPP Saudara/i <span class="text-rose-600">*</span></label>
-                    <input type="text" id="edit-npp" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">No. WhatsApp Aktif</label>
-                    <input type="tel" required id="edit-phone" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Penugasan Saat Ini (Jabatan - Unit Kerja - Kantor/Proyek)</label>
-                    <input type="text" required id="edit-penugasan" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Atasan Langsung</label>
-                    <input type="text" required id="edit-atasan" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Durasi di Penugasan Sekarang</label>
-                    <input type="text" required id="edit-durasi" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
-                </div>
-                <div class="pt-2 border-t border-slate-200">
-                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Link Google Drive / Tautan CV Terupdate</label>
-                    <input type="url" required id="edit-cv" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
-                </div>
-                <div class="flex space-x-3 pt-4">
-                    <button type="button" onclick="closeEditProfileModal()" class="w-1/2 bg-white hover:bg-slate-100 text-slate-700 font-semibold py-2.5 rounded-xl text-sm border border-slate-300 transition-colors">Batal</button>
-                    <button type="submit" class="w-1/2 bg-gradient-to-r from-rose-600 to-purple-600 text-white font-semibold py-2.5 rounded-xl text-sm transition-all shadow-lg hover:shadow-purple-950/30">Simpan Perubahan</button>
+
+                <!-- PAGE 2: Kompetensi Diri -->
+                <div id="edit-page-2" class="hidden space-y-4">
+                    <p class="text-xs text-slate-500 mb-2 font-medium">Silahkan isi informasi sertifikasi yang Anda miliki (Link wajib menggunakan awalan https://):</p>
+                    <div id="edit-certifications-container" class="space-y-4"></div>
+                    
+                    <button type="button" onclick="addCertificationField('edit')" class="w-full py-2 border-2 border-dashed border-slate-300 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition-colors">
+                        + Tambah Sertifikasi
+                    </button>
+                    
+                    <div class="flex space-x-3 pt-4 border-t border-slate-200">
+                        <button type="button" onclick="navigatePage('edit', 1)" class="w-1/2 bg-white hover:bg-slate-100 text-slate-700 font-semibold py-2.5 rounded-xl text-sm border border-slate-300 transition-colors">Kembali</button>
+                        <button type="submit" class="w-1/2 bg-gradient-to-r from-rose-600 to-purple-600 text-white font-semibold py-2.5 rounded-xl text-sm shadow-lg hover:shadow-purple-950/30">Simpan Perubahan</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -266,7 +304,6 @@
     <!-- POP-UP MODAL FORMULIR LAMARAN -->
     <div id="apply-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4 transition-all duration-300">
         <div class="glass-modal rounded-2xl max-w-xl w-full shadow-2xl max-h-[85vh] flex flex-col transform transition-all scale-95 opacity-0 duration-200" id="modal-box">
-            
             <div class="flex justify-between items-start p-6 border-b border-slate-200 shrink-0">
                 <div>
                     <h3 class="text-xl font-bold text-slate-900" id="modal-job-title">Apply Job</h3>
@@ -294,6 +331,7 @@
                 <input type="hidden" id="form-atasan">
                 <input type="hidden" id="form-durasi">
                 <input type="hidden" id="form-cv">
+                <input type="hidden" id="form-certs">
 
                 <div class="space-y-4 pt-2">
                     <div class="flex items-center space-x-2 mb-1">
@@ -312,7 +350,6 @@
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5">Mengapa Anda tertarik menduduki posisi ini? <span class="text-rose-600">*</span></label>
                         <textarea required id="form-alasan" rows="3" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all resize-none placeholder:text-slate-400" placeholder="Tuliskan alasan profesional Anda..."></textarea>
                     </div>
-                    <!-- Input CV Link sudah dihapus dari sini karena dipindah ke Profil -->
                 </div>
             </form>
 
@@ -331,24 +368,121 @@
         let currentActiveJob = null;
         let currentActiveCompany = null;
 
-        // FUNGSI UNTUK MENAMPILKAN/MENYEMBUNYIKAN KOLOM NPP
+        // FUNGSI NAVIGASI PADA MULTI-STEP PROFILE
+        function navigatePage(prefix, pageNumber) {
+            const page1 = document.getElementById(`${prefix}-page-1`);
+            const page2 = document.getElementById(`${prefix}-page-2`);
+            const indicator = document.getElementById(`${prefix}-step-indicator`);
+
+            // Validasi kelayakan halaman 1 sebelum beranjak ke halaman 2
+            if(pageNumber === 2) {
+                const inputsPage1 = page1.querySelectorAll('input[required], select[required]');
+                let isValid = true;
+                inputsPage1.forEach(input => { if(!input.checkValidity()) { input.reportValidity(); isValid = false; } });
+                if(!isValid) return;
+            }
+
+            if(pageNumber === 1) {
+                page1.classList.remove('hidden'); page2.classList.add('hidden');
+                indicator.innerText = "Halaman 1 dari 2: Biodata Diri";
+            } else {
+                page1.classList.add('hidden'); page2.classList.remove('hidden');
+                indicator.innerText = "Halaman 2 dari 2: Kompetensi Diri";
+            }
+        }
+
         function toggleNPPVisibility(prefix) {
             const isAdhiVal = document.getElementById(`${prefix}-is-adhi`).value;
             const nppContainer = document.getElementById(`${prefix}-npp-container`);
             const nppInput = document.getElementById(`${prefix}-npp`);
             
             if (isAdhiVal === 'Ya') {
-                nppContainer.classList.remove('hidden');
-                nppInput.setAttribute('required', 'required');
+                nppContainer.classList.remove('hidden'); nppInput.setAttribute('required', 'required');
             } else {
-                nppContainer.classList.add('hidden');
-                nppInput.removeAttribute('required');
-                nppInput.value = ''; // Kosongkan jika memilih Tidak
+                nppContainer.classList.add('hidden'); nppInput.removeAttribute('required'); nppInput.value = '';
             }
         }
 
-        function saveUserProfile(event) {
+        // FUNGSI DINAMIS MANAJEMEN SERTIFIKASI
+        function initDefaultCertifications(prefix, data = null) {
+            const container = document.getElementById(`${prefix}-certifications-container`);
+            container.innerHTML = '';
+            
+            if(data && data.length > 0) {
+                data.forEach((cert, idx) => addCertificationField(prefix, cert.nama, cert.expired, cert.link));
+            } else {
+                // Default memunculkan 2 set pertanyaan kosong saat awal mendaftar
+                addCertificationField(prefix);
+                addCertificationField(prefix);
+            }
+        }
+
+        function addCertificationField(prefix, nama="", expired="", link="") {
+            const container = document.getElementById(`${prefix}-certifications-container`);
+            const index = container.children.length;
+            
+            // Konversi format tanggal DD-MM-YYYY ke YYYY-MM-DD agar dibaca element input type="date"
+            let formattedDate = "";
+            if (expired && expired.includes('-')) {
+                const parts = expired.split('-');
+                if(parts[2] && parts[2].length === 4) formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+
+            const html = `
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 relative group/item">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Sertifikasi #${index + 1}</span>
+                        ${index >= 2 ? `<button type="button" onclick="this.parentElement.parentElement.remove()" class="text-xs text-rose-600 hover:text-rose-800 font-semibold">Hapus</button>` : ''}
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Nama Sertifikasi</label>
+                            <input type="text" placeholder="Contoh: SKA Ahli Muda" value="${nama}" class="cert-nama w-full px-3 py-1.5 text-xs glass-input rounded-lg focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Masa Berakhir (DD-MM-YYYY)</label>
+                            <input type="date" value="${formattedDate}" class="cert-expired w-full px-3 py-1.5 text-xs glass-input rounded-lg focus:outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-semibold text-slate-500 mb-1">Link Sertifikasi <span class="text-[9px] text-slate-400">(Wajib awalan https://)</span></label>
+                        <input type="url" pattern="https://.*" placeholder="https://drive.google.com/..." value="${link}" class="cert-link w-full px-3 py-1.5 text-xs glass-input rounded-lg focus:outline-none">
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function extractCertificationsData(prefix) {
+            const container = document.getElementById(`${prefix}-certifications-container`);
+            const items = container.children;
+            let certsArray = [];
+
+            for(let i=0; i<items.length; i++) {
+                const nama = items[i].querySelector('.cert-nama').value.trim();
+                const rawDate = items[i].querySelector('.cert-expired').value;
+                const link = items[i].querySelector('.cert-link').value.trim();
+
+                let expiredFormatted = "";
+                if(rawDate) {
+                    const d = new Date(rawDate);
+                    const day = String(d.getDate()).padStart(2, '0');
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const year = d.getFullYear();
+                    expiredFormatted = `${day}-${month}-${year}`; // Ubah ke DD-MM-YYYY
+                }
+
+                if(nama || expiredFormatted || link) {
+                    certsArray.push({ nama: nama, expired: expiredFormatted, link: link });
+                }
+            }
+            return certsArray;
+        }
+
+        function handleProfileSetupSubmit(event) {
             event.preventDefault();
+            const certsData = extractCertificationsData('setup');
+
             const profileData = {
                 nama: document.getElementById('setup-nama').value,
                 isAdhi: document.getElementById('setup-is-adhi').value,
@@ -357,17 +491,18 @@
                 penugasan: document.getElementById('setup-penugasan').value,
                 atasan: document.getElementById('setup-atasan').value,
                 durasi: document.getElementById('setup-durasi').value,
-                cvLink: document.getElementById('setup-cv').value
+                cvLink: document.getElementById('setup-cv').value,
+                certifications: certsData
             };
             
             localStorage.setItem('user_profile_completed', JSON.stringify(profileData));
-            
             document.getElementById('profile-setup-screen').classList.add('hidden');
             document.getElementById('main-portal').classList.remove('hidden');
             fetchJobs();
         }
 
         function openEditProfileModal() {
+            navigatePage('edit', 1); // Reset selalu buka halaman 1 dahulu
             const savedProfile = JSON.parse(localStorage.getItem('user_profile_completed'));
             if (savedProfile) {
                 document.getElementById('edit-nama').value = savedProfile.nama || '';
@@ -379,7 +514,8 @@
                 document.getElementById('edit-durasi').value = savedProfile.durasi || '';
                 document.getElementById('edit-cv').value = savedProfile.cvLink || '';
                 
-                toggleNPPVisibility('edit'); // Trigger tampilan NPP sesuai data lama
+                toggleNPPVisibility('edit');
+                initDefaultCertifications('edit', savedProfile.certifications || null);
             }
             
             const modal = document.getElementById('edit-profile-modal');
@@ -395,8 +531,10 @@
             setTimeout(() => { modal.classList.add('hidden'); }, 200);
         }
 
-        function saveUpdatedProfile(event) {
+        function handleProfileUpdateSubmit(event) {
             event.preventDefault();
+            const certsData = extractCertificationsData('edit');
+
             const updatedData = {
                 nama: document.getElementById('edit-nama').value,
                 isAdhi: document.getElementById('edit-is-adhi').value,
@@ -405,7 +543,8 @@
                 penugasan: document.getElementById('edit-penugasan').value,
                 atasan: document.getElementById('edit-atasan').value,
                 durasi: document.getElementById('edit-durasi').value,
-                cvLink: document.getElementById('edit-cv').value
+                cvLink: document.getElementById('edit-cv').value,
+                certifications: certsData
             };
             
             localStorage.setItem('user_profile_completed', JSON.stringify(updatedData));
@@ -441,7 +580,6 @@
             document.getElementById('modal-job-company').innerText = perusahaan;
             document.getElementById('modal-job-aktivitas').innerText = aktivitas;
 
-            // Memuat data profil terkini ke hidden inputs
             const savedProfile = JSON.parse(localStorage.getItem('user_profile_completed'));
             if (savedProfile) {
                 document.getElementById('form-nama').value = savedProfile.nama;
@@ -452,6 +590,13 @@
                 document.getElementById('form-atasan').value = savedProfile.atasan;
                 document.getElementById('form-durasi').value = savedProfile.durasi;
                 document.getElementById('form-cv').value = savedProfile.cvLink;
+                
+                // Kemas data seluruh kompetensi/sertifikasi menjadi format teks ringkas
+                let certsString = "Tidak Ada";
+                if(savedProfile.certifications && savedProfile.certifications.length > 0){
+                    certsString = savedProfile.certifications.map(c => `${c.nama} (Exp: ${c.expired || '-'}) Link: ${c.link || '-'}`).join(' | ');
+                }
+                document.getElementById('form-certs').value = certsString;
             }
             
             const reqContainer = document.getElementById('dynamic-requirement-container');
@@ -491,7 +636,6 @@
         function handleFormSubmit(event) {
             event.preventDefault();
             
-            // Ambil dari hidden input yang sudah disuntik dari Local Storage
             const nama = document.getElementById('form-nama').value;
             const isAdhi = document.getElementById('form-is-adhi').value;
             const npp = document.getElementById('form-npp').value;
@@ -500,7 +644,7 @@
             const atasan = document.getElementById('form-atasan').value;
             const durasi = document.getElementById('form-durasi').value;
             const cvLink = document.getElementById('form-cv').value;
-            
+            const certsDataText = document.getElementById('form-certs').value;
             const alasan = document.getElementById('form-alasan').value;
 
             let assessmentSummary = [];
@@ -512,17 +656,16 @@
                 assessmentSummary.push(`${reqName}: ${score}% (${isChecked ? 'Sesuai' : 'Tidak Sesuai'})`);
             }
             
-            // TRIK KHUSUS: Menggabungkan info Pegawai & NPP ke dalam field 'Nama' agar tetap masuk 
-            // ke Google Sheets Anda tanpa harus mengubah kode Google Apps Script di backend.
             const namaDanStatusPegawai = isAdhi === 'Ya' ? `${nama} (Pegawai ADHI - NPP: ${npp})` : `${nama} (Bukan Pegawai ADHI)`;
 
+            // Menggabungkan seluruh data pelengkap (posisi, alasan lamaran, assessment, dan kompetensi bersertifikat) ke field alasanDanAssessment backend
             const payload = {
                 nama: namaDanStatusPegawai, 
                 phone: phone, 
                 penugasan: penugasan, 
                 atasan: atasan, 
                 durasi: durasi,
-                alasanDanAssessment: `[POSISI]: ${currentActiveJob} (${currentActiveCompany}) | [ASSESSMENT]: ${assessmentSummary.join(', ')} | [ALASAN]: ${alasan}`,
+                alasanDanAssessment: `[POSISI]: ${currentActiveJob} (${currentActiveCompany}) | [ASSESSMENT]: ${assessmentSummary.join(', ')} | [KOMPETENSI]: ${certsDataText} | [ALASAN]: ${alasan}`,
                 cvLink: cvLink
             };
 
