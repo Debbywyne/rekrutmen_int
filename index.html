@@ -341,11 +341,15 @@ function handleFormSubmit(event) {
        t
 
         async function fetchJobs() {
-            // DISESUAIKAN: Menghapus huruf 's' agar cocok dengan id="job-container" Anda
-            const container = document.getElementById('job-container'); 
+            // Mengambil elemen secara dinamis saat fungsi berjalan
+            let container = document.getElementById('job-container') || document.getElementById('jobs-container');
+            let skeleton = document.getElementById('loading-state') || document.getElementById('skeleton-loader');
             
-            // DISESUAIKAN: Mengganti nama agar cocok dengan id="loading-state" Anda
-            const skeleton = document.getElementById('loading-state');
+            // Pengaman ekstra: Jika container masih tidak ditemukan, cari ulang setelah 100ms
+            if (!container) {
+                setTimeout(fetchJobs, 100);
+                return;
+            }
             
             try {
                 const response = await fetch(SHEET_URL);
