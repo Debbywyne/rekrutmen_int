@@ -6,6 +6,83 @@
     <title>Job Board Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        <!-- SDK Firebase yang dibutuhkan -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // ==========================================
+        // PANTAU & PASANG KODE CONFIG FIREBASE ANDA DI SINI
+        // ==========================================
+        const firebaseConfig = {
+
+  apiKey: "AIzaSyDA18k3sRbGkKiBYy0Adg13vkuFEAh5OuY",
+
+  authDomain: "jobboard-69df5.firebaseapp.com",
+
+  projectId: "jobboard-69df5",
+
+  storageBucket: "jobboard-69df5.firebasestorage.app",
+
+  messagingSenderId: "194184652257",
+
+  appId: "1:194184652257:web:c3abbbffcf1e9a04009ea0",
+
+  measurementId: "G-8CZ5S6GN6C"
+
+};
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // Batasi domain email tertentu jika mau (Opsional)
+        // provider.setCustomParameters({ hd: "perusahaananda.com" });
+
+        // Fungsi Login
+        window.loginWithGoogle = function() {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    console.log("User logged in:", result.user);
+                }).catch((error) => {
+                    console.error("Login Error:", error);
+                    alert("Gagal login dengan Google: " + error.message);
+                });
+        }
+
+        // Fungsi Logout
+        window.logout = function() {
+            signOut(auth).then(() => {
+                console.log("Logged out");
+            });
+        }
+
+        // Pantau Status Login User
+        onAuthStateChanged(auth, (user) => {
+            const loginScreen = document.getElementById('login-screen');
+            const mainContent = document.getElementById('main-portal');
+            const userEmailTxt = document.getElementById('user-email');
+
+            if (user) {
+                // Jika sudah login, isi otomatis field Nama/Email jika dibutuhkan
+                document.getElementById('form-nama').value = user.displayName || '';
+                if(userEmailTxt) userEmailTxt.innerText = user.email;
+
+                // Tampilkan portal, sembunyikan halaman login
+                loginScreen.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+                
+                // Ambil data job dari sheet
+                fetchJobs();
+            } else {
+                // Jika belum login, tampilkan halaman login, sembunyikan portal
+                loginScreen.classList.remove('hidden');
+                mainContent.classList.add('hidden');
+            }
+        });
+    </script>
+                
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         
