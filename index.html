@@ -13,7 +13,6 @@
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
 
-        /* Kondisi Normal: Efek Kaca Blur (Semi-Transparent Frosted Glass) */
         .glass-card {
             background: rgba(255, 255, 255, 0.4);
             backdrop-filter: blur(20px);
@@ -23,21 +22,18 @@
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        /* Kondisi Hover: Mengisi warna (Full Fill Maroon Liquid) dan memancarkan efek kaca bercahaya */
         .glass-card:hover {
-            background: rgba(153, 27, 27, 0.95); /* Maroon solid dengan transparansi liquid halus */
+            background: rgba(153, 27, 27, 0.95);
             backdrop-filter: blur(10px);
             border-color: rgba(153, 27, 27, 1);
             box-shadow: 0 20px 40px 0 rgba(153, 27, 27, 0.25);
             transform: translateY(-5px);
         }
 
-        /* Sinkronisasi transisi warna teks di dalam kartu saat di-hover */
         .glass-card * {
             transition: color 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
         }
 
-        /* Diubah menjadi solid putih/terang agar teks gelap di dalamnya kontras */
         .glass-modal {
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(24px);
@@ -99,7 +95,7 @@
     <div id="apply-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4 transition-all duration-300">
         <div class="glass-modal rounded-2xl max-w-xl w-full shadow-2xl max-h-[85vh] flex flex-col transform transition-all scale-95 opacity-0 duration-200" id="modal-box">
             
-            <!-- Header Modal (Warna Font Diganti Gelap) -->
+            <!-- Header Modal -->
             <div class="flex justify-between items-start p-6 border-b border-slate-200 shrink-0">
                 <div>
                     <h3 class="text-xl font-bold text-slate-900" id="modal-job-title">Apply Job</h3>
@@ -113,7 +109,7 @@
             <!-- Form Konten -->
             <form id="screening-form" onsubmit="handleFormSubmit(event)" class="space-y-6 overflow-y-auto p-6 flex-1 custom-scroll">
                 
-                <!-- BAGIAN BARU: DESKRIPSI JABATAN LENGKAP -->
+                <!-- DETAIL DESKRIPSI -->
                 <div class="p-4 bg-red-50 border border-red-100 rounded-xl space-y-3">
                     <div>
                         <h4 class="text-xs font-bold text-red-950 uppercase tracking-wide">Aktivitas Utama Pekerjaan:</h4>
@@ -200,7 +196,8 @@
     <script>
         const SPREADSHEET_ID = '1gd6VUH334-0Kx3HCF2ZBnOyiShoOSaJbmTyvxIlesdU'; 
         const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=job`;
-        
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyb2UyLIbmhwKeoP-mAfpq5sTvO5WyG1rkbVVyoEsalmOd3IoUDJwu9VEvqanshSuX6_w/exec'; 
+
         let currentActiveJob = null;
         let currentActiveCompany = null;
 
@@ -227,8 +224,13 @@
             }
         }
 
-        // Fungsi Modal Baru: Menerima parameter Aktivitas Utama untuk ditampilkan penuh
-        function openApplyModal(jabatan, perusahaan, rawRequirement, aktivitas) {
+        // Fungsi pemicu modal berbasis pembacaan Atribut Elemen (Aman dari error tanda petik)
+        function triggerApplyModal(buttonElement) {
+            const jabatan = buttonElement.getAttribute('data-jabatan');
+            const perusahaan = buttonElement.getAttribute('data-departemen');
+            const requirement = buttonElement.getAttribute('data-requirement');
+            const aktivitas = buttonElement.getAttribute('data-aktivitas');
+
             currentActiveJob = jabatan;
             currentActiveCompany = perusahaan;
             
@@ -239,7 +241,7 @@
             const reqContainer = document.getElementById('dynamic-requirement-container');
             reqContainer.innerHTML = ''; 
 
-            const reqList = rawRequirement.split('|').map(item => item.trim()).filter(item => item.length > 0);
+            const reqList = requirement.split('|').map(item => item.trim()).filter(item => item.length > 0);
 
             reqList.forEach((reqText, index) => {
                 const uniqueId = `req-item-${index}`;
@@ -284,8 +286,6 @@
                 document.getElementById('screening-form').reset();
             }, 200);
         }
-
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyb2UyLIbmhwKeoP-mAfpq5sTvO5WyG1rkbVVyoEsalmOd3IoUDJwu9VEvqanshSuX6_w/exec'; 
 
         function handleFormSubmit(event) {
             event.preventDefault();
@@ -377,11 +377,11 @@
                 data.table.rows.forEach(row => {
                     if (!row || !row.c) return;
 
-                    const jabatan = (idxJabatan !== -1 && row.c[idxJabatan]) ? row.c[idxJabatan].v : 'Posisi Tidak Terbaca';
-                    const departemen = (idxDepartemen !== -1 && row.c[idxDepartemen]) ? row.c[idxDepartemen].v : '-';
-                    const penugasan = (idxPenugasan !== -1 && row.c[idxPenugasan]) ? row.c[idxPenugasan].v : 'Internal';
-                    const aktivitas = (idxAktivitas !== -1 && row.c[idxAktivitas]) ? row.c[idxAktivitas].v : 'Detail aktivitas belum diisi.';
-                    const requirement = (idxRequirement !== -1 && row.c[idxRequirement]) ? row.c[idxRequirement].v : '';
+                    const jabatan = (idxJabatan !== -1 && row.c[idxJabatan]) ? String(row.c[idxJabatan].v) : 'Posisi Tidak Terbaca';
+                    const departemen = (idxDepartemen !== -1 && row.c[idxDepartemen]) ? String(row.c[idxDepartemen].v) : '-';
+                    const penugasan = (idxPenugasan !== -1 && row.c[idxPenugasan]) ? String(row.c[idxPenugasan].v) : 'Internal';
+                    const aktivitas = (idxAktivitas !== -1 && row.c[idxAktivitas]) ? String(row.c[idxAktivitas].v) : 'Detail aktivitas belum diisi.';
+                    const requirement = (idxRequirement !== -1 && row.c[idxRequirement]) ? String(row.c[idxRequirement].v) : '';
                     
                     let status = 'Open';
                     if (idxStatus !== -1 && row.c[idxStatus] && row.c[idxStatus].v) {
@@ -393,9 +393,18 @@
                     const statusDotColor = isOpen ? 'bg-emerald-500 group-hover:bg-emerald-300' : 'bg-rose-500 group-hover:bg-rose-300';
                     const statusTextColor = isOpen ? 'text-emerald-600 group-hover:text-emerald-300' : 'text-rose-600 group-hover:text-rose-300';
                     
-                    // Mengirimkan parameter aktivitas ke openApplyModal agar terbaca penuh
+                    // Mengubah string agar aman dimasukkan ke dalam atribut data HTML (meloloskan tanda petik ganda)
+                    const safeJabatan =延 = jabatan.replace(/"/g, '&quot;');
+                    const safeDept = departemen.replace(/"/g, '&quot;');
+                    const safeReq = requirement.replace(/"/g, '&quot;');
+                    const safeAkt = aktivitas.replace(/"/g, '&quot;');
+
                     const buttonHTML = isOpen 
-                        ? `<button onclick="openApplyModal('${jabatan.replace(/'/g, "\\'")}', '${departemen.replace(/'/g, "\\'")}', '${requirement.replace(/'/g, "\\'")}', '${aktivitas.replace(/'/g, "\\'")}')"
+                        ? `<button onclick="triggerApplyModal(this)"
+                              data-jabatan="${safeJabatan}"
+                              data-departemen="${safeDept}"
+                              data-requirement="${safeReq}"
+                              data-aktivitas="${safeAkt}"
                               class="inline-flex items-center justify-center bg-red-800 hover:bg-red-900 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm group-hover:bg-white group-hover:text-red-900 transition-all">
                               Apply Position
                            </button>`
