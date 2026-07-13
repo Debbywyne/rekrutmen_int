@@ -5,14 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Board Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- SDK Firebase yang dibutuhkan -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // ==========================================
+        // PANTAU & PASANG KODE CONFIG FIREBASE ANDA DI SINI
+        // ==========================================
+        const firebaseConfig = {
+
+  apiKey: "AIzaSyDA18k3sRbGkKiBYy0Adg13vkuFEAh5OuY",
+
+  authDomain: "jobboard-69df5.firebaseapp.com",
+
+  projectId: "jobboard-69df5",
+
+  storageBucket: "jobboard-69df5.firebasestorage.app",
+
+  messagingSenderId: "194184652257",
+
+  appId: "1:194184652257:web:c3abbbffcf1e9a04009ea0",
+
+  measurementId: "G-8CZ5S6GN6C"
+
+};
+
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // Batasi domain email tertentu jika mau (Opsional)
+        // provider.setCustomParameters({ hd: "perusahaananda.com" });
+
+        // Fungsi Login
+        window.loginWithGoogle = function() {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    console.log("User logged in:", result.user);
+                }).catch((error) => {
+                    console.error("Login Error:", error);
+                    alert("Gagal login dengan Google: " + error.message);
+                });
+        }
+
+        // Fungsi Logout
+        window.logout = function() {
+            signOut(auth).then(() => {
+                console.log("Logged out");
+            });
+        }
+
+        // Pantau Status Login User
+        onAuthStateChanged(auth, (user) => {
+            const loginScreen = document.getElementById('login-screen');
+            const mainContent = document.getElementById('main-portal');
+            const userEmailTxt = document.getElementById('user-email');
+
+            if (user) {
+                // Jika sudah login, isi otomatis field Nama/Email jika dibutuhkan
+                document.getElementById('form-nama').value = user.displayName || '';
+                if(userEmailTxt) userEmailTxt.innerText = user.email;
+
+                // Tampilkan portal, sembunyikan halaman login
+                loginScreen.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+                
+                // Ambil data job dari sheet
+                fetchJobs();
+            } else {
+                // Jika belum login, tampilkan halaman login, sembunyikan portal
+                loginScreen.classList.remove('hidden');
+                mainContent.classList.add('hidden');
+            }
+        });
+    </script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
-
         .glass-card {
             background: rgba(255, 255, 255, 0.4);
             backdrop-filter: blur(20px);
@@ -21,7 +98,6 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.03);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
         .glass-card:hover {
             background: rgba(153, 27, 27, 0.95);
             backdrop-filter: blur(10px);
@@ -29,67 +105,75 @@
             box-shadow: 0 20px 40px 0 rgba(153, 27, 27, 0.25);
             transform: translateY(-5px);
         }
-
-        .glass-card * {
-            transition: color 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
-        }
-
-        .glass-modal {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .glass-input {
-            background: rgba(0, 0, 0, 0.03);
-            border: 1px solid rgba(0, 0, 0, 0.12);
-            color: #1e293b;
-        }
-        .glass-input:focus {
-            background: #ffffff;
-            border-color: #991b1b;
-        }
+        .glass-card * { transition: color 0.3s ease, border-color 0.3s ease, background-color 0.3s ease; }
+        .glass-modal { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(24px); border: 1px solid rgba(0, 0, 0, 0.1); }
+        .glass-input { background: rgba(0, 0, 0, 0.03); border: 1px solid rgba(0, 0, 0, 0.12); color: #1e293b; }
+        .glass-input:focus { background: #ffffff; border-color: #991b1b; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-slate-100 to-zinc-200 text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Header -->
-    <header class="bg-black/20 backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 bg-gradient-to-tr from-rose-600 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-purple-900/30">J</div>
-                <span class="text-lg font-bold tracking-tight text-white">Job<span class="text-rose-400">Board</span></span>
-            </div>
-            <div class="flex items-center space-x-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full">
-                <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
-                <span class="text-xs text-slate-300 font-medium tracking-wide">BMT </span>
-            </div>
+    <!-- SCREEN 1: HALAMAN LOGIN (DI-RENDER PERTAMA) -->
+    <div id="login-screen" class="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-slate-900 via-red-950 to-black p-4">
+        <div class="bg-white/10 backdrop-blur-md border border-white/10 p-8 rounded-2xl max-w-sm w-full text-center shadow-2xl">
+            <div class="w-14 h-14 bg-gradient-to-tr from-rose-600 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-xl mx-auto mb-4">J</div>
+            <h2 class="text-xl font-bold text-white tracking-tight">Internal Job Portal</h2>
+            <p class="text-xs text-slate-300 mt-1 mb-8">Silakan masuk menggunakan akun Google Perusahaan Anda untuk mengeksplorasi peluang karier.</p>
+            
+            <button onclick="loginWithGoogle()" class="w-full flex items-center justify-center space-x-3 bg-white hover:bg-slate-100 text-slate-800 font-semibold py-3 px-4 rounded-xl text-sm transition-all shadow-lg active:scale-95">
+                <svg class="w-5 h-5" viewBox="0 0 24 24">
+                    <path fill="#EA4335" d="M12 5.04c1.64 0 3.12.56 4.28 1.67l3.2-3.2C17.52 1.58 14.98 1 12 1 7.24 1 3.2 3.73 1.24 7.72l3.84 2.98C6.01 7.22 8.78 5.04 12 5.04z"/>
+                    <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.29 1.48-1.14 2.73-2.4 3.58l3.73 2.89c2.18-2.01 3.7-4.99 3.7-8.62z"/>
+                    <path fill="#FBBC05" d="M5.08 14.7a7.14 7.14 0 0 1 0-4.41L1.24 7.31a11.93 11.93 0 0 0 0 9.37l3.84-2.98z"/>
+                    <path fill="#34A853" d="M12 23c3.24 0 5.97-1.08 7.96-2.91l-3.73-2.89c-1.04.7-2.38 1.11-4.23 1.11-3.22 0-5.99-2.18-6.96-5.11L1.19 16.18C3.14 20.27 7.21 23 12 23z"/>
+                </svg>
+                <span>Masuk dengan Google</span>
+            </button>
         </div>
-    </header>
+    </div>
 
-    <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-6 py-16 flex-1 w-full">
-        <div class="max-w-2xl mb-14">
-            <h1 class="text-3xl font-extrabold text-red-950 tracking-tight sm:text-4xl mb-3">Eksplorasi Peluang Karier Internal</h1>
-            <p class="text-base text-slate-600 leading-relaxed">Kembangkan potensi dirimu!</p>
-        </div>
-
-        <!-- Container Lowongan -->
-        <div id="job-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div id="loading-state" class="col-span-full text-center py-16 glass-card rounded-2xl">
-                <div class="inline-block animate-spin rounded-full h-7 w-7 border-3 border-rose-500 border-t-transparent mb-3"></div>
-                <p class="text-slate-400 text-sm font-medium">Sinkronisasi data lowongan...</p>
+    <!-- SCREEN 2: MAIN PORTAL (DISEMBUNYIKAN SEBELUM LOGIN) -->
+    <div id="main-portal" class="hidden flex-1 flex flex-col">
+        <!-- Header -->
+        <header class="bg-black/20 backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
+            <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 bg-gradient-to-tr from-rose-600 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-purple-900/30">J</div>
+                    <span class="text-lg font-bold tracking-tight text-white">Job<span class="text-rose-400">Board</span></span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-[10px] text-slate-400 font-medium">Logged in as:</p>
+                        <p id="user-email" class="text-xs text-white font-semibold">loading...</p>
+                    </div>
+                    <button onclick="logout()" class="text-xs bg-white/10 hover:bg-rose-900/40 text-slate-200 hover:text-white px-3 py-1.5 rounded-lg border border-white/10 transition-colors">Logout</button>
+                </div>
             </div>
-        </div>
-    </main>
+        </header>
 
-    <!-- Footer -->
-    <footer class="bg-black/10 border-t border-white/5 mt-20 py-6">
-        <div class="max-w-6xl mx-auto px-6 text-center text-xs text-slate-500 font-medium">
-            &copy; 2026 JobBoard Created By Bruno.
-        </div>
-    </footer>
+        <!-- Main Content -->
+        <main class="max-w-6xl mx-auto px-6 py-16 flex-1 w-full">
+            <div class="max-w-2xl mb-14">
+                <h1 class="text-3xl font-extrabold text-red-950 tracking-tight sm:text-4xl mb-3">Eksplorasi Peluang Karier Internal</h1>
+                <p class="text-base text-slate-600 leading-relaxed">Kembangkan potensi dirimu!</p>
+            </div>
+
+            <!-- Container Lowongan -->
+            <div id="job-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div id="loading-state" class="col-span-full text-center py-16 glass-card rounded-2xl">
+                    <div class="inline-block animate-spin rounded-full h-7 w-7 border-3 border-rose-500 border-t-transparent mb-3"></div>
+                    <p class="text-slate-400 text-sm font-medium">Sinkronisasi data lowongan...</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-black/10 border-t border-white/5 mt-20 py-6">
+            <div class="max-w-6xl mx-auto px-6 text-center text-xs text-slate-500 font-medium">
+                &copy; 2026 JobBoard Portal. Professional Glassmorphism Interface.
+            </div>
+        </footer>
+    </div>
 
     <!-- POP-UP MODAL FORMULIR -->
     <div id="apply-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4 transition-all duration-300">
@@ -108,8 +192,6 @@
             
             <!-- Form Konten -->
             <form id="screening-form" onsubmit="handleFormSubmit(event)" class="space-y-6 overflow-y-auto p-6 flex-1 custom-scroll">
-                
-                <!-- DETAIL DESKRIPSI -->
                 <div class="p-4 bg-red-50 border border-red-100 rounded-xl space-y-3">
                     <div>
                         <h4 class="text-xs font-bold text-red-950 uppercase tracking-wide">Aktivitas Utama Pekerjaan:</h4>
@@ -117,34 +199,29 @@
                     </div>
                 </div>
 
-                <!-- BAGIAN 1: DATA DIRI -->
+                <!-- BAGIAN 1 -->
                 <div class="space-y-4 pt-2">
                     <div class="flex items-center space-x-2 mb-2">
                         <span class="w-1 h-4 bg-gradient-to-b from-rose-500 to-purple-500 rounded-full"></span>
                         <p class="text-xs font-bold text-slate-900 uppercase tracking-wider">1. Informasi Personal</p>
                     </div>
-                    
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="sm:col-span-2">
                             <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Lengkap (Sesuai KTP) <span class="text-rose-600">*</span></label>
                             <input type="text" required id="form-nama" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-400" placeholder="Masukkan nama lengkap">
                         </div>
-                        
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1.5">No. WhatsApp Aktif <span class="text-rose-600">*</span></label>
                             <input type="tel" required id="form-phone" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-400" placeholder="Contoh: 08123456789">
                         </div>
-
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1.5">Durasi di Penugasan Sekarang <span class="text-rose-600">*</span></label>
                             <input type="text" required id="form-durasi" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-400" placeholder="Contoh: 1 Tahun 3 Bulan">
                         </div>
-
                         <div class="sm:col-span-2">
                             <label class="block text-xs font-semibold text-slate-600 mb-1.5">Penugasan Saat Ini (Jabatan / Proyek) <span class="text-rose-600">*</span></label>
                             <input type="text" required id="form-penugasan" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-400" placeholder="Sebutkan posisi atau unit kerja saat ini">
                         </div>
-
                         <div class="sm:col-span-2">
                             <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Atasan Langsung (PM / Manager Biro) <span class="text-rose-600">*</span></label>
                             <input type="text" required id="form-atasan" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-400" placeholder="Masukkan nama atasan Anda">
@@ -152,20 +229,16 @@
                     </div>
                 </div>
 
-                <!-- BAGIAN 2: REQUIREMENT DINAMIS -->
+                <!-- BAGIAN 2 -->
                 <div class="space-y-4 pt-4 border-t border-slate-200">
                     <div class="flex items-center space-x-2 mb-1">
                         <span class="w-1 h-4 bg-gradient-to-b from-rose-500 to-purple-500 rounded-full"></span>
                         <p class="text-xs font-bold text-slate-900 uppercase tracking-wider">2. Self Assessment Kualifikasi</p>
                     </div>
-                    <p class="text-[11px] text-slate-500 leading-relaxed italic">Aktifkan ceklist jika Anda memenuhi kualifikasi, lalu tentukan persentase penguasaan Anda melalui slider.</p>
-                    
-                    <div id="dynamic-requirement-container" class="space-y-3">
-                        <!-- Komponen otomatis dibuat lewat JS -->
-                    </div>
+                    <div id="dynamic-requirement-container" class="space-y-3"></div>
                 </div>
 
-                <!-- BAGIAN 3: ALASAN & DOKUMEN -->
+                <!-- BAGIAN 3 -->
                 <div class="space-y-4 pt-4 border-t border-slate-200">
                     <div class="flex items-center space-x-2 mb-2">
                         <span class="w-1 h-4 bg-gradient-to-b from-rose-500 to-purple-500 rounded-full"></span>
@@ -184,12 +257,10 @@
                 </div>
             </form>
 
-            <!-- Tombol Kaki Modal -->
             <div class="p-6 flex space-x-3 border-t border-slate-200 shrink-0 bg-slate-50 rounded-b-2xl">
                 <button type="button" onclick="closeModal()" class="w-1/2 bg-white hover:bg-slate-100 text-slate-700 font-semibold py-2.5 rounded-xl text-sm border border-slate-300 transition-colors">Batal</button>
-                <button type="button" onclick="document.getElementById('screening-form').requestSubmit()" class="w-1/2 bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white font-semibold py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-purple-950/30">Kirim Lamaran</button>
+                <button type="button" onclick="document.getElementById('screening-form').requestSubmit()" class="w-1/2 bg-gradient-to-r from-rose-600 to-purple-600 text-white font-semibold py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-purple-950/30">Kirim Lamaran</button>
             </div>
-
         </div>
     </div>
 
@@ -208,88 +279,63 @@
             const sliderWrapper = document.getElementById(`wrapper-slider-${index}`);
 
             if (checkBox.checked) {
-                slider.disabled = false;
-                slider.value = 50; 
-                indicator.innerText = "50%";
-                indicator.classList.remove('text-slate-400');
-                indicator.classList.add('text-rose-600');
+                slider.disabled = false; slider.value = 50; indicator.innerText = "50%";
+                indicator.classList.remove('text-slate-400'); indicator.classList.add('text-rose-600');
                 sliderWrapper.classList.remove('opacity-30');
             } else {
-                slider.disabled = true;
-                slider.value = 0; 
-                indicator.innerText = "0%";
-                indicator.classList.remove('text-rose-600');
-                indicator.classList.add('text-slate-400');
+                slider.disabled = true; slider.value = 0; indicator.innerText = "0%";
+                indicator.classList.remove('text-rose-600'); indicator.classList.add('text-slate-400');
                 sliderWrapper.classList.add('opacity-30');
             }
         }
 
-        // Fungsi pemicu modal berbasis pembacaan Atribut Elemen (Aman dari error tanda petik)
         function triggerApplyModal(buttonElement) {
             const jabatan = buttonElement.getAttribute('data-jabatan');
             const perusahaan = buttonElement.getAttribute('data-departemen');
             const requirement = buttonElement.getAttribute('data-requirement');
             const aktivitas = buttonElement.getAttribute('data-aktivitas');
 
-            currentActiveJob = jabatan;
-            currentActiveCompany = perusahaan;
-            
+            currentActiveJob = jabatan; currentActiveCompany = perusahaan;
             document.getElementById('modal-job-title').innerText = jabatan;
             document.getElementById('modal-job-company').innerText = perusahaan;
             document.getElementById('modal-job-aktivitas').innerText = aktivitas;
             
             const reqContainer = document.getElementById('dynamic-requirement-container');
             reqContainer.innerHTML = ''; 
-
             const reqList = requirement.split('|').map(item => item.trim()).filter(item => item.length > 0);
 
             reqList.forEach((reqText, index) => {
                 const uniqueId = `req-item-${index}`;
                 const sliderId = `slider-val-${index}`;
-                
-                const elementHTML = `
+                reqContainer.insertAdjacentHTML('beforeend', `
                     <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5 transition-all">
                         <label class="flex items-start cursor-pointer group">
-                            <input type="checkbox" id="${uniqueId}-check" value="${reqText}" 
-                                   onchange="toggleRequirementSlider(${index})"
-                                   class="mt-0.5 w-4 h-4 text-rose-600 border-slate-300 bg-white rounded focus:ring-rose-500 transition-colors cursor-pointer">
-                            <span class="ml-3 text-xs text-slate-700 font-medium leading-relaxed group-hover:text-black transition-colors">${reqText}</span>
+                            <input type="checkbox" id="${uniqueId}-check" value="${reqText}" onchange="toggleRequirementSlider(${index})" class="mt-0.5 w-4 h-4 text-rose-600 border-slate-300 bg-white rounded focus:ring-rose-500 cursor-pointer">
+                            <span class="ml-3 text-xs text-slate-700 font-medium leading-relaxed group-hover:text-black">${reqText}</span>
                         </label>
-                        <div class="pl-7 flex items-center space-x-3 opacity-30 transition-opacity" id="wrapper-slider-${index}">
-                            <input type="range" min="0" max="100" value="0" id="${uniqueId}-range" disabled
-                                   oninput="document.getElementById('${sliderId}').innerText = this.value + '%'"
-                                   class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-rose-500 disabled:cursor-not-allowed">
-                            <span class="text-xs font-bold text-slate-400 min-w-[35px] text-right transition-colors" id="${sliderId}">0%</span>
+                        <div class="pl-7 flex items-center space-x-3 opacity-30" id="wrapper-slider-${index}">
+                            <input type="range" min="0" max="100" value="0" id="${uniqueId}-range" disabled oninput="document.getElementById('${sliderId}').innerText = this.value + '%'" class="w-full h-1 bg-slate-200 rounded-lg appearance-none accent-rose-500 disabled:cursor-not-allowed">
+                            <span class="text-xs font-bold text-slate-400 min-w-[35px] text-right" id="${sliderId}">0%</span>
                         </div>
                     </div>
-                `;
-                reqContainer.insertAdjacentHTML('beforeend', elementHTML);
+                `);
             });
             
             const modal = document.getElementById('apply-modal');
             const box = document.getElementById('modal-box');
-            
             modal.classList.remove('hidden');
-            setTimeout(() => {
-                box.classList.remove('scale-95', 'opacity-0');
-                box.classList.add('scale-100', 'opacity-100');
-            }, 50);
+            setTimeout(() => { box.classList.remove('scale-95', 'opacity-0'); box.classList.add('scale-100', 'opacity-100'); }, 50);
         }
 
         function closeModal() {
             const modal = document.getElementById('apply-modal');
             const box = document.getElementById('modal-box');
-            box.classList.remove('scale-100', 'opacity-100');
-            box.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                document.getElementById('screening-form').reset();
-            }, 200);
+            box.classList.remove('scale-100', 'opacity-100'); box.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); document.getElementById('screening-form').reset(); }, 200);
         }
 
         function handleFormSubmit(event) {
             event.preventDefault();
-            
             const nama = document.getElementById('form-nama').value;
             const phone = document.getElementById('form-phone').value;
             const penugasan = document.getElementById('form-penugasan').value;
@@ -300,71 +346,38 @@
 
             let assessmentSummary = [];
             const container = document.getElementById('dynamic-requirement-container');
-            const items = container.children.length;
-
-            for(let i = 0; i < items; i++) {
+            for(let i = 0; i < container.children.length; i++) {
                 const isChecked = document.getElementById(`req-item-${i}-check`).checked;
                 const reqName = document.getElementById(`req-item-${i}-check`).value;
                 const score = document.getElementById(`req-item-${i}-range`).value;
-                
-                assessmentSummary.push(`${reqName}: ${score}% (${isChecked ? 'Sesuai' : 'Tidak Sesuai/Tidak Diceklis'})`);
+                assessmentSummary.push(`${reqName}: ${score}% (${isChecked ? 'Sesuai' : 'Tidak Sesuai'})`);
             }
-            const assessmentText = assessmentSummary.join(', ');
-            const alasanDanAssessment = `[POSISI]: ${currentActiveJob} (${currentActiveCompany}) | [ASSESSMENT]: ${assessmentText} | [ALASAN]: ${alasan}`;
-
+            
             const payload = {
-                nama: nama,
-                phone: phone,
-                penugasan: penugasan,
-                atasan: atasan,
-                durasi: durasi,
-                alasanDanAssessment: alasanDanAssessment,
+                nama: nama, phone: phone, penugasan: penugasan, atasan: atasan, durasi: durasi,
+                alasanDanAssessment: `[POSISI]: ${currentActiveJob} (${currentActiveCompany}) | [ASSESSMENT]: ${assessmentSummary.join(', ')} | [ALASAN]: ${alasan}`,
                 cvLink: cvLink
             };
 
-            fetch(WEB_APP_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(() => {
-                alert(`Aplikasi pendaftaran posisi "${currentActiveJob}" berhasil dikirim langsung ke database!`);
-                closeModal();
-            })
-            .catch(err => {
-                console.error(err);
-                alert('Terjadi kesalahan saat mengirim data.');
-            });
+            fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            .then(() => { alert(`Aplikasi pendaftaran posisi "${currentActiveJob}" berhasil dikirim!`); closeModal(); })
+            .catch(err => { console.error(err); alert('Terjadi kesalahan saat mengirim data.'); });
         }
 
         async function fetchJobs() {
-            let container = document.getElementById('job-container') || document.getElementById('jobs-container');
-            let skeleton = document.getElementById('loading-state') || document.getElementById('skeleton-loader');
-            
-            if (!container) {
-                setTimeout(fetchJobs, 100);
-                return;
-            }
-            
+            let container = document.getElementById('job-container');
+            let skeleton = document.getElementById('loading-state');
             try {
                 const response = await fetch(SHEET_URL);
                 const text = await response.text();
                 const data = JSON.parse(text.substr(47).slice(0, -2));
                 
                 if (!data.table || !data.table.rows || data.table.rows.length === 0) {
-                    container.innerHTML = '<p class="text-center text-slate-500 py-8">Belum ada lowongan yang tersedia saat ini.</p>';
-                    if (skeleton) skeleton.classList.add('hidden');
+                    container.innerHTML = '<p class="text-center text-slate-500 py-8">Belum ada lowongan yang tersedia.</p>';
                     return;
                 }
 
-                const headers = data.table.cols.map(col => {
-                    if (!col || !col.label) return '';
-                    return String(col.label).toLowerCase().trim();
-                });
-
+                const headers = data.table.cols.map(col => col && col.label ? String(col.label).toLowerCase().trim() : '');
                 const idxJabatan = headers.findIndex(h => h.includes('jabatan') || h.includes('posisi'));
                 const idxDepartemen = headers.findIndex(h => h.includes('departemen') || h.includes('divisi'));
                 const idxPenugasan = headers.findIndex(h => h.includes('penugasan') || h.includes('tipe'));
@@ -373,57 +386,37 @@
                 const idxStatus = headers.findIndex(h => h.includes('status'));
 
                 let htmlContent = '';
-
                 data.table.rows.forEach(row => {
                     if (!row || !row.c) return;
-
                     const jabatan = (idxJabatan !== -1 && row.c[idxJabatan]) ? String(row.c[idxJabatan].v) : 'Posisi Tidak Terbaca';
                     const departemen = (idxDepartemen !== -1 && row.c[idxDepartemen]) ? String(row.c[idxDepartemen].v) : '-';
                     const penugasan = (idxPenugasan !== -1 && row.c[idxPenugasan]) ? String(row.c[idxPenugasan].v) : 'Internal';
                     const aktivitas = (idxAktivitas !== -1 && row.c[idxAktivitas]) ? String(row.c[idxAktivitas].v) : 'Detail aktivitas belum diisi.';
                     const requirement = (idxRequirement !== -1 && row.c[idxRequirement]) ? String(row.c[idxRequirement].v) : '';
-                    
-                    let status = 'Open';
-                    if (idxStatus !== -1 && row.c[idxStatus] && row.c[idxStatus].v) {
-                        status = String(row.c[idxStatus].v).trim();
-                    }
+                    let status = (idxStatus !== -1 && row.c[idxStatus] && row.c[idxStatus].v) ? String(row.c[idxStatus].v).trim() : 'Open';
 
                     const isOpen = status.toLowerCase() === 'open';
-                    const statusText = isOpen ? 'Open' : 'Closed';
-                    const statusDotColor = isOpen ? 'bg-emerald-500 group-hover:bg-emerald-300' : 'bg-rose-500 group-hover:bg-rose-300';
-                    const statusTextColor = isOpen ? 'text-emerald-600 group-hover:text-emerald-300' : 'text-rose-600 group-hover:text-rose-300';
-                    
-                    // Mengubah string agar aman dimasukkan ke dalam atribut data HTML (meloloskan tanda petik ganda)
-                    const safeJabatan =延 = jabatan.replace(/"/g, '&quot;');
+                    const safeJabatan = jabatan.replace(/"/g, '&quot;');
                     const safeDept = departemen.replace(/"/g, '&quot;');
                     const safeReq = requirement.replace(/"/g, '&quot;');
                     const safeAkt = aktivitas.replace(/"/g, '&quot;');
 
                     const buttonHTML = isOpen 
-                        ? `<button onclick="triggerApplyModal(this)"
-                              data-jabatan="${safeJabatan}"
-                              data-departemen="${safeDept}"
-                              data-requirement="${safeReq}"
-                              data-aktivitas="${safeAkt}"
-                              class="inline-flex items-center justify-center bg-red-800 hover:bg-red-900 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm group-hover:bg-white group-hover:text-red-900 transition-all">
-                              Apply Position
-                           </button>`
-                        : `<span class="text-xs font-bold text-rose-700 bg-rose-100 group-hover:bg-rose-900 group-hover:text-rose-100 px-3 py-1.5 rounded-lg border border-rose-200 group-hover:border-rose-700 transition-all">Position Closed</span>`;
+                        ? `<button onclick="triggerApplyModal(this)" data-jabatan="${safeJabatan}" data-departemen="${safeDept}" data-requirement="${safeReq}" data-aktivitas="${safeAkt}" class="inline-flex items-center justify-center bg-red-800 hover:bg-red-900 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm group-hover:bg-white group-hover:text-red-900 transition-all">Apply Position</button>`
+                        : `<span class="text-xs font-bold text-rose-700 bg-rose-100 px-3 py-1.5 rounded-lg border border-rose-200">Position Closed</span>`;
 
                     htmlContent += `
-                        <div class="glass-card rounded-2xl p-6 flex flex-col justify-between group cursor-pointer">
+                        <div class="glass-card rounded-2xl p-6 flex flex-col justify-between group">
                             <div>
                                 <div class="flex justify-between items-center mb-4">
-                                    <span class="text-[10px] font-bold bg-slate-200/60 text-slate-700 px-2.5 py-1 rounded-lg border border-white/20 uppercase tracking-wider group-hover:bg-red-900 group-hover:text-red-200">${penugasan}</span>
+                                    <span class="text-[10px] font-bold bg-slate-200/60 text-slate-700 px-2.5 py-1 rounded-lg uppercase tracking-wider group-hover:bg-red-900 group-hover:text-red-200">${penugasan}</span>
                                     <div class="flex items-center space-x-1.5">
-                                        <span class="w-1.5 h-1.5 rounded-full animate-pulse ${statusDotColor}"></span>
-                                        <span class="text-[10px] font-bold tracking-wide uppercase ${statusTextColor}">${statusText}</span>
+                                        <span class="w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
+                                        <span class="text-[10px] font-bold uppercase ${isOpen ? 'text-emerald-600 group-hover:text-emerald-300' : 'text-rose-600'}">${isOpen?'Open':'Closed'}</span>
                                     </div>
                                 </div>
-                                
                                 <h3 class="text-base font-bold text-slate-900 mb-0.5 group-hover:text-white line-clamp-1">${jabatan}</h3>
                                 <p class="text-xs text-slate-500 font-medium mb-4 group-hover:text-red-200">${departemen}</p>
-                                
                                 <div class="space-y-3 border-t border-slate-200/60 pt-3 group-hover:border-red-700">
                                     <div>
                                         <h4 class="text-[11px] font-bold text-red-800 uppercase tracking-wide group-hover:text-red-200">Aktivitas Utama:</h4>
@@ -435,24 +428,16 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="mt-6 pt-4 border-t border-slate-200/60 flex items-center justify-end group-hover:border-red-700">
-                                ${buttonHTML}
-                            </div>
+                            <div class="mt-6 pt-4 border-t border-slate-200/60 flex items-center justify-end group-hover:border-red-700">${buttonHTML}</div>
                         </div>
                     `;
                 });
-
                 container.innerHTML = htmlContent;
             } catch (error) {
-                console.error('Error fetching jobs:', error);
-                container.innerHTML = '<p class="text-center text-rose-600 py-8">Gagal memuat lowongan kerja. Silakan coba muat ulang halaman.</p>';
-            } finally {
-                if (skeleton) skeleton.classList.add('hidden');
-            }
+                console.error(error);
+                container.innerHTML = '<p class="text-center text-rose-600 py-8">Gagal memuat lowongan kerja.</p>';
+            } finally { if (skeleton) skeleton.classList.add('hidden'); }
         }
-
-        document.addEventListener('DOMContentLoaded', fetchJobs);
     </script>
 </body>
 </html>
