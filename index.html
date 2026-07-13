@@ -6,42 +6,25 @@
     <title>Job Board Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- SDK Firebase yang dibutuhkan -->
+    <!-- SDK Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // ==========================================
-        // PANTAU & PASANG KODE CONFIG FIREBASE ANDA DI SINI
-        // ==========================================
         const firebaseConfig = {
+            apiKey: "AIzaSyDA18k3sRbGkKiBYy0Adg13vkuFEAh5OuY",
+            authDomain: "jobboard-69df5.firebaseapp.com",
+            projectId: "jobboard-69df5",
+            storageBucket: "jobboard-69df5.firebasestorage.app",
+            messagingSenderId: "194184652257",
+            appId: "1:194184652257:web:c3abbbffcf1e9a04009ea0",
+            measurementId: "G-8CZ5S6GN6C"
+        };
 
-  apiKey: "AIzaSyDA18k3sRbGkKiBYy0Adg13vkuFEAh5OuY",
-
-  authDomain: "jobboard-69df5.firebaseapp.com",
-
-  projectId: "jobboard-69df5",
-
-  storageBucket: "jobboard-69df5.firebasestorage.app",
-
-  messagingSenderId: "194184652257",
-
-  appId: "1:194184652257:web:c3abbbffcf1e9a04009ea0",
-
-  measurementId: "G-8CZ5S6GN6C"
-
-};
-
-
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        // Batasi domain email tertentu jika mau (Opsional)
-        // provider.setCustomParameters({ hd: "perusahaananda.com" });
-
-        // Fungsi Login
         window.loginWithGoogle = function() {
             signInWithPopup(auth, provider)
                 .then((result) => {
@@ -52,113 +35,57 @@
                 });
         }
 
-        // Fungsi Logout
         window.logout = function() {
+            // Hapus data profil lokal saat logout agar bisa tes ulang jika perlu
+            localStorage.removeItem('user_profile_completed');
             signOut(auth).then(() => {
                 console.log("Logged out");
             });
         }
 
-        // Pantau Status Login User
         onAuthStateChanged(auth, (user) => {
             const loginScreen = document.getElementById('login-screen');
+            const profileScreen = document.getElementById('profile-setup-screen');
             const mainContent = document.getElementById('main-portal');
             const userEmailTxt = document.getElementById('user-email');
 
             if (user) {
-                // Jika sudah login, isi otomatis field Nama/Email jika dibutuhkan
-                document.getElementById('form-nama').value = user.displayName || '';
-                if(userEmailTxt) userEmailTxt.innerText = user.email;
-
-                // Tampilkan portal, sembunyikan halaman login
                 loginScreen.classList.add('hidden');
-                mainContent.classList.remove('hidden');
-                
-                // Ambil data job dari sheet
-                fetchJobs();
+                if (userEmailTxt) userEmailTxt.innerText = user.email;
+
+                // Cek apakah user sudah mengisi profil sebelumnya
+                const profileCompleted = localStorage.getItem('user_profile_completed');
+                if (profileCompleted) {
+                    profileScreen.classList.add('hidden');
+                    mainContent.classList.remove('hidden');
+                    fetchJobs();
+                } else {
+                    // Jika belum, paksa isi profil terlebih dahulu
+                    profileScreen.classList.remove('hidden');
+                    mainContent.classList.add('hidden');
+                    
+                    // Isi nama otomatis dari akun Google
+                    document.getElementById('setup-nama').value = user.displayName || '';
+                }
             } else {
-                // Jika belum login, tampilkan halaman login, sembunyikan portal
                 loginScreen.classList.remove('hidden');
+                profileScreen.classList.add('hidden');
                 mainContent.classList.add('hidden');
             }
         });
     </script>
 
-    <!-- SDK Firebase yang dibutuhkan -->
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-    // ==========================================
-    // PANTAU & PASANG KODE CONFIG FIREBASE ANDA DI SINI
-    // ==========================================
-    const firebaseConfig = {
-    apiKey: "AIzaSyDA18k3sRbGkKiBYy0Adg13vkuFEAh5OuY",
-    authDomain: "jobboard-69df5.firebaseapp.com",
-    projectId: "jobboard-69df5",
-    storageBucket: "jobboard-69df5.firebasestorage.app",
-    messagingSenderId: "194184652257",
-    appId: "1:194184652257:web:c3abbbffcf1e9a04009ea0",
-    measurementId: "G-8CZ5S6GN6C"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-
-    // Batasi domain email tertentu jika mau (Opsional)
-    // provider.setCustomParameters({ hd: "perusahaananda.com" });
-
-    // Fungsi Login
-    window.loginWithGoogle = function() {
-        signInWithPopup(auth, provider)
-            .then((result) => {
-                console.log("User logged in:", result.user);
-            }).catch((error) => {
-                console.error("Login Error:", error);
-                alert("Gagal login dengan Google: " + error.message);
-            });
-    }
-
-    // Fungsi Logout
-    window.logout = function() {
-        signOut(auth).then(() => {
-            console.log("Logged out");
-        });
-    }
-
-    // Pantau Status Login User
-    onAuthStateChanged(auth, (user) => {
-        const loginScreen = document.getElementById('login-screen');
-        const mainContent = document.getElementById('main-portal');
-        const userEmailTxt = document.getElementById('user-email');
-
-        if (user) {
-            // Jika sudah login, isi otomatis field Nama/Email jika dibutuhkan
-            document.getElementById('form-nama').value = user.displayName || '';
-            if(userEmailTxt) userEmailTxt.innerText = user.email;
-
-            // Tampilkan portal, sembunyikan halaman login
-            loginScreen.classList.add('hidden');
-            mainContent.classList.remove('hidden');
-            
-            // Ambil data job dari sheet
-            fetchJobs();
-        } else {
-            // Jika belum login, tampilkan halaman login, sembunyikan portal
-            loginScreen.classList.remove('hidden');
-            mainContent.classList.add('hidden');
-        }
-    });
-</script>
-
+    <!-- PENTING: Tag pembuka <style> harus ada di sini -->
+    <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
+        
+        /* Efek Hover Card Full Merah */
         .glass-card {
-            background: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.45);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.7);
@@ -166,13 +93,27 @@ const provider = new GoogleAuthProvider();
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .glass-card:hover {
-            background: rgba(153, 27, 27, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(153, 27, 27, 0.98) !important;
             border-color: rgba(153, 27, 27, 1);
             box-shadow: 0 20px 40px 0 rgba(153, 27, 27, 0.25);
             transform: translateY(-5px);
         }
-        .glass-card * { transition: color 0.3s ease, border-color 0.3s ease, background-color 0.3s ease; }
+        /* Mengubah semua warna teks di dalam card menjadi putih saat di-hover */
+        .glass-card:hover h3,
+        .glass-card:hover p,
+        .glass-card:hover h4,
+        .glass-card:hover span {
+            color: #ffffff !important;
+        }
+        .glass-card:hover .border-t {
+            border-color: rgba(255, 255, 255, 0.2) !important;
+        }
+        /* Mengubah tombol apply di dalam card menjadi putih solid saat di-hover */
+        .glass-card:hover button {
+            background-color: #ffffff !important;
+            color: #991b1b !important;
+        }
+
         .glass-modal { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(24px); border: 1px solid rgba(0, 0, 0, 0.1); }
         .glass-input { background: rgba(0, 0, 0, 0.03); border: 1px solid rgba(0, 0, 0, 0.12); color: #1e293b; }
         .glass-input:focus { background: #ffffff; border-color: #991b1b; }
@@ -180,7 +121,7 @@ const provider = new GoogleAuthProvider();
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-slate-100 to-zinc-200 text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <!-- SCREEN 1: HALAMAN LOGIN (DI-RENDER PERTAMA) -->
+    <!-- SCREEN 1: HALAMAN LOGIN -->
     <div id="login-screen" class="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-slate-900 via-red-950 to-black p-4">
         <div class="bg-white/10 backdrop-blur-md border border-white/10 p-8 rounded-2xl max-w-sm w-full text-center shadow-2xl">
             <div class="w-14 h-14 bg-gradient-to-tr from-rose-600 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-xl mx-auto mb-4">J</div>
@@ -199,13 +140,47 @@ const provider = new GoogleAuthProvider();
         </div>
     </div>
 
-    <!-- SCREEN 2: MAIN PORTAL (DISEMBUNYIKAN SEBELUM LOGIN) -->
+    <!-- SCREEN 1.5: MANDATORY PROFILE SETUP -->
+    <div id="profile-setup-screen" class="fixed inset-0 z-[90] hidden flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-950 to-black p-4">
+        <div class="bg-white/95 backdrop-blur-md p-8 rounded-2xl max-w-md w-full shadow-2xl">
+            <h2 class="text-xl font-bold text-slate-900 tracking-tight">Lengkapi Profil Anda</h2>
+            <p class="text-xs text-slate-500 mt-1 mb-6">Sebelum melanjutkan ke portal lowongan, mohon lengkapi profil dasar Anda terlebih dahulu.</p>
+            
+            <form id="profile-setup-form" onsubmit="saveUserProfile(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Lengkap (Sesuai KTP)</label>
+                    <input type="text" required id="setup-nama" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">No. WhatsApp Aktif</label>
+                    <input type="tel" required id="setup-phone" placeholder="Contoh: 0812345678" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Penugasan Saat Ini (Jabatan / Proyek)</label>
+                    <input type="text" required id="setup-penugasan" placeholder="Sebutkan posisi Anda saat ini" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Atasan Langsung</label>
+                    <input type="text" required id="setup-atasan" placeholder="Nama PM / Manager" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Durasi di Penugasan Sekarang</label>
+                    <input type="text" required id="setup-durasi" placeholder="Contoh: 1 Tahun" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all">
+                </div>
+                <button type="submit" class="w-full mt-2 bg-gradient-to-r from-rose-600 to-purple-600 text-white font-semibold py-3 px-4 rounded-xl text-sm transition-all shadow-lg hover:shadow-purple-950/30">
+                    Simpan & Lanjutkan
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: MAIN PORTAL -->
     <div id="main-portal" class="hidden flex-1 flex flex-col">
         <!-- Header -->
-        <header class="bg-black/20 backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
+        <header class="bg-slate-900/90 backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
             <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
                 <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 bg-gradient-to-tr from-rose-600 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-purple-900/30">J</div>
+                    <div class="w-9 h-9 bg-gradient-to-tr from-rose-600 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">J</div>
                     <span class="text-lg font-bold tracking-tight text-white">Job<span class="text-rose-400">Board</span></span>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -266,50 +241,27 @@ const provider = new GoogleAuthProvider();
                     </div>
                 </div>
 
-                <!-- BAGIAN 1 -->
-                <div class="space-y-4 pt-2">
-                    <div class="flex items-center space-x-2 mb-2">
-                        <span class="w-1 h-4 bg-gradient-to-b from-rose-500 to-purple-500 rounded-full"></span>
-                        <p class="text-xs font-bold text-slate-900 uppercase tracking-wider">1. Informasi Personal</p>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div class="sm:col-span-2">
-                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Lengkap (Sesuai KTP) <span class="text-rose-600">*</span></label>
-                            <input type="text" required id="form-nama" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-400" placeholder="Masukkan nama lengkap">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">No. WhatsApp Aktif <span class="text-rose-600">*</span></label>
-                            <input type="tel" required id="form-phone" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-400" placeholder="Contoh: 08123456789">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Durasi di Penugasan Sekarang <span class="text-rose-600">*</span></label>
-                            <input type="text" required id="form-durasi" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-400" placeholder="Contoh: 1 Tahun 3 Bulan">
-                        </div>
-                        <div class="sm:col-span-2">
-                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Penugasan Saat Ini (Jabatan / Proyek) <span class="text-rose-600">*</span></label>
-                            <input type="text" required id="form-penugasan" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-400" placeholder="Sebutkan posisi atau unit kerja saat ini">
-                        </div>
-                        <div class="sm:col-span-2">
-                            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Nama Atasan Langsung (PM / Manager Biro) <span class="text-rose-600">*</span></label>
-                            <input type="text" required id="form-atasan" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all placeholder:text-slate-400" placeholder="Masukkan nama atasan Anda">
-                        </div>
-                    </div>
-                </div>
+                <!-- Hidden inputs untuk menyimpan data profil yang sudah diisi sebelumnya -->
+                <input type="hidden" id="form-nama">
+                <input type="hidden" id="form-phone">
+                <input type="hidden" id="form-penugasan">
+                <input type="hidden" id="form-atasan">
+                <input type="hidden" id="form-durasi">
 
-                <!-- BAGIAN 2 -->
-                <div class="space-y-4 pt-4 border-t border-slate-200">
+                <!-- BAGIAN 2: Self Assessment -->
+                <div class="space-y-4 pt-2">
                     <div class="flex items-center space-x-2 mb-1">
                         <span class="w-1 h-4 bg-gradient-to-b from-rose-500 to-purple-500 rounded-full"></span>
-                        <p class="text-xs font-bold text-slate-900 uppercase tracking-wider">2. Self Assessment Kualifikasi</p>
+                        <p class="text-xs font-bold text-slate-900 uppercase tracking-wider">1. Self Assessment Kualifikasi</p>
                     </div>
                     <div id="dynamic-requirement-container" class="space-y-3"></div>
                 </div>
 
-                <!-- BAGIAN 3 -->
+                <!-- BAGIAN 3: Motivasi -->
                 <div class="space-y-4 pt-4 border-t border-slate-200">
                     <div class="flex items-center space-x-2 mb-2">
                         <span class="w-1 h-4 bg-gradient-to-b from-rose-500 to-purple-500 rounded-full"></span>
-                        <p class="text-xs font-bold text-slate-900 uppercase tracking-wider">3. Motivasi & Dokumen Pendukung</p>
+                        <p class="text-xs font-bold text-slate-900 uppercase tracking-wider">2. Motivasi & Dokumen Pendukung</p>
                     </div>
                     <div class="space-y-4">
                         <div>
@@ -339,6 +291,25 @@ const provider = new GoogleAuthProvider();
         let currentActiveJob = null;
         let currentActiveCompany = null;
 
+        // Fungsi menyimpan data Profil ke LocalStorage
+        function saveUserProfile(event) {
+            event.preventDefault();
+            const profileData = {
+                nama: document.getElementById('setup-nama').value,
+                phone: document.getElementById('setup-phone').value,
+                penugasan: document.getElementById('setup-penugasan').value,
+                atasan: document.getElementById('setup-atasan').value,
+                durasi: document.getElementById('setup-durasi').value
+            };
+            
+            localStorage.setItem('user_profile_completed', JSON.stringify(profileData));
+            
+            // Sembunyikan layar setup profil dan buka portal utama
+            document.getElementById('profile-setup-screen').classList.add('hidden');
+            document.getElementById('main-portal').classList.remove('hidden');
+            fetchJobs();
+        }
+
         function toggleRequirementSlider(index) {
             const checkBox = document.getElementById(`req-item-${index}-check`);
             const slider = document.getElementById(`req-item-${index}-range`);
@@ -366,6 +337,16 @@ const provider = new GoogleAuthProvider();
             document.getElementById('modal-job-title').innerText = jabatan;
             document.getElementById('modal-job-company').innerText = perusahaan;
             document.getElementById('modal-job-aktivitas').innerText = aktivitas;
+
+            // Load data profil yang tersimpan ke form apply (hidden)
+            const savedProfile = JSON.parse(localStorage.getItem('user_profile_completed'));
+            if (savedProfile) {
+                document.getElementById('form-nama').value = savedProfile.nama;
+                document.getElementById('form-phone').value = savedProfile.phone;
+                document.getElementById('form-penugasan').value = savedProfile.penugasan;
+                document.getElementById('form-atasan').value = savedProfile.atasan;
+                document.getElementById('form-durasi').value = savedProfile.durasi;
+            }
             
             const reqContainer = document.getElementById('dynamic-requirement-container');
             reqContainer.innerHTML = ''; 
@@ -469,33 +450,33 @@ const provider = new GoogleAuthProvider();
                     const safeAkt = aktivitas.replace(/"/g, '&quot;');
 
                     const buttonHTML = isOpen 
-                        ? `<button onclick="triggerApplyModal(this)" data-jabatan="${safeJabatan}" data-departemen="${safeDept}" data-requirement="${safeReq}" data-aktivitas="${safeAkt}" class="inline-flex items-center justify-center bg-red-800 hover:bg-red-900 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm group-hover:bg-white group-hover:text-red-900 transition-all">Apply Position</button>`
+                        ? `<button onclick="triggerApplyModal(this)" data-jabatan="${safeJabatan}" data-departemen="${safeDept}" data-requirement="${safeReq}" data-aktivitas="${safeAkt}" class="inline-flex items-center justify-center bg-red-800 hover:bg-red-900 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-sm transition-all">Apply Position</button>`
                         : `<span class="text-xs font-bold text-rose-700 bg-rose-100 px-3 py-1.5 rounded-lg border border-rose-200">Position Closed</span>`;
 
                     htmlContent += `
-                        <div class="glass-card rounded-2xl p-6 flex flex-col justify-between group">
+                        <div class="glass-card rounded-2xl p-6 flex flex-col justify-between group cursor-pointer">
                             <div>
                                 <div class="flex justify-between items-center mb-4">
-                                    <span class="text-[10px] font-bold bg-slate-200/60 text-slate-700 px-2.5 py-1 rounded-lg uppercase tracking-wider group-hover:bg-red-900 group-hover:text-red-200">${penugasan}</span>
+                                    <span class="text-[10px] font-bold bg-slate-200/60 text-slate-700 px-2.5 py-1 rounded-lg uppercase tracking-wider">${penugasan}</span>
                                     <div class="flex items-center space-x-1.5">
                                         <span class="w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
-                                        <span class="text-[10px] font-bold uppercase ${isOpen ? 'text-emerald-600 group-hover:text-emerald-300' : 'text-rose-600'}">${isOpen?'Open':'Closed'}</span>
+                                        <span class="text-[10px] font-bold uppercase ${isOpen ? 'text-emerald-600' : 'text-rose-600'}">${isOpen?'Open':'Closed'}</span>
                                     </div>
                                 </div>
-                                <h3 class="text-base font-bold text-slate-900 mb-0.5 group-hover:text-white line-clamp-1">${jabatan}</h3>
-                                <p class="text-xs text-slate-500 font-medium mb-4 group-hover:text-red-200">${departemen}</p>
-                                <div class="space-y-3 border-t border-slate-200/60 pt-3 group-hover:border-red-700">
+                                <h3 class="text-base font-bold text-slate-900 mb-0.5 line-clamp-1">${jabatan}</h3>
+                                <p class="text-xs text-slate-500 font-medium mb-4">${departemen}</p>
+                                <div class="space-y-3 border-t border-slate-200/60 pt-3">
                                     <div>
-                                        <h4 class="text-[11px] font-bold text-red-800 uppercase tracking-wide group-hover:text-red-200">Aktivitas Utama:</h4>
-                                        <p class="text-xs text-slate-600 line-clamp-3 mt-0.5 leading-relaxed group-hover:text-slate-100">${aktivitas}</p>
+                                        <h4 class="text-[11px] font-bold text-red-800 uppercase tracking-wide">Aktivitas Utama:</h4>
+                                        <p class="text-xs text-slate-600 line-clamp-3 mt-0.5 leading-relaxed">${aktivitas}</p>
                                     </div>
                                     <div>
-                                        <h4 class="text-[11px] font-bold text-slate-700 uppercase tracking-wide group-hover:text-red-200">Kualifikasi:</h4>
-                                        <p class="text-xs text-slate-500 line-clamp-2 mt-0.5 leading-relaxed group-hover:text-slate-200">${requirement.replace(/\|/g, ' • ')}</p>
+                                        <h4 class="text-[11px] font-bold text-slate-700 uppercase tracking-wide">Kualifikasi:</h4>
+                                        <p class="text-xs text-slate-500 line-clamp-2 mt-0.5 leading-relaxed">${requirement.replace(/\|/g, ' • ')}</p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="mt-6 pt-4 border-t border-slate-200/60 flex items-center justify-end group-hover:border-red-700">${buttonHTML}</div>
+                            <div class="mt-6 pt-4 border-t border-slate-200/60 flex items-center justify-end">${buttonHTML}</div>
                         </div>
                     `;
                 });
