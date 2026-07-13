@@ -241,18 +241,18 @@
                 const sliderId = `slider-val-${index}`;
                 
                 const elementHTML = `
-                    <div class="p-3.5 bg-white/5 border border-white/10 rounded-xl space-y-2.5 transition-all">
+                    <div class="p-3.5 bg-slate-100/80 border border-slate-200 rounded-xl space-y-2.5 transition-all">
                         <label class="flex items-start cursor-pointer group">
                             <input type="checkbox" id="${uniqueId}-check" value="${reqText}" 
                                    onchange="toggleRequirementSlider(${index})"
-                                   class="mt-0.5 w-4 h-4 text-rose-600 border-white/20 bg-black/20 rounded focus:ring-rose-500 transition-colors cursor-pointer">
-                            <span class="ml-3 text-xs text-slate-300 font-medium leading-relaxed group-hover:text-white transition-colors">${reqText}</span>
+                                   class="mt-0.5 w-4 h-4 text-rose-600 border-slate-300 bg-white rounded focus:ring-rose-500 transition-colors cursor-pointer">
+                            <span class="ml-3 text-xs text-slate-700 font-medium leading-relaxed group-hover:text-black transition-colors">${reqText}</span>
                         </label>
                         <div class="pl-7 flex items-center space-x-3 opacity-30 transition-opacity" id="wrapper-slider-${index}">
                             <input type="range" min="0" max="100" value="0" id="${uniqueId}-range" disabled
                                    oninput="document.getElementById('${sliderId}').innerText = this.value + '%'"
-                                   class="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-rose-500 disabled:cursor-not-allowed">
-                            <span class="text-xs font-bold text-slate-600 min-w-[35px] text-right transition-colors" id="${sliderId}">0%</span>
+                                   class="w-full h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-rose-500 disabled:cursor-not-allowed">
+                            <span class="text-xs font-bold text-slate-500 min-w-[35px] text-right transition-colors" id="${sliderId}">0%</span>
                         </div>
                     </div>
                 `;
