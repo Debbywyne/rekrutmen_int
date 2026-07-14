@@ -1,126 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Board Portal</title>
+    <title>Portal Lowongan Kerja ADHI</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- SDK Firebase -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDA18k3sRbGkKiBYy0Adg13vkuFEAh5OuY",
-            authDomain: "jobboard-69df5.firebaseapp.com",
-            projectId: "jobboard-69df5",
-            storageBucket: "jobboard-69df5.firebasestorage.app",
-            messagingSenderId: "194184652257",
-            appId: "1:194184652257:web:c3abbbffcf1e9a04009ea0",
-            measurementId: "G-8CZ5S6GN6C"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-
-        window.loginWithGoogle = function() {
-            signInWithPopup(auth, provider)
-                .then((result) => {
-                    console.log("User logged in:", result.user);
-                }).catch((error) => {
-                    console.error("Login Error:", error);
-                    alert("Gagal login dengan Google: " + error.message);
-                });
-        }
-
-        window.logout = function() {
-            signOut(auth).then(() => {
-                console.log("Logged out");
-            });
-        }
-
-        onAuthStateChanged(auth, (user) => {
-            const loginScreen = document.getElementById('login-screen');
-            const profileScreen = document.getElementById('profile-setup-screen');
-            const mainContent = document.getElementById('main-portal');
-            const userEmailTxt = document.getElementById('user-email');
-
-            if (user) {
-                loginScreen.classList.add('hidden');
-                if (userEmailTxt) userEmailTxt.innerText = user.email;
-
-                const profileCompleted = localStorage.getItem('user_profile_completed');
-                if (profileCompleted) {
-                    profileScreen.classList.add('hidden');
-                    mainContent.classList.remove('hidden');
-                    fetchJobs();
-                } else {
-                    profileScreen.classList.remove('hidden');
-                    mainContent.classList.add('hidden');
-                    document.getElementById('setup-nama').value = user.displayName || '';
-                    initDefaultCertifications('setup');
-                }
-            } else {
-                loginScreen.classList.remove('hidden');
-                profileScreen.classList.add('hidden');
-                mainContent.classList.add('hidden');
-            }
-        });
-    </script>
-
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .custom-scroll::-webkit-scrollbar { width: 6px; }
-        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
-        
-        .glass-card {
-            background: rgba(255, 255, 255, 0.45);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.03);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        .glass-input {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(226, 232, 240, 1);
         }
-        .glass-card:hover {
-            background: rgba(153, 27, 27, 0.98) !important;
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 1);
             border-color: rgba(153, 27, 27, 1);
-            box-shadow: 0 20px 40px 0 rgba(153, 27, 27, 0.25);
-            transform: translateY(-5px);
         }
-        .glass-card:hover h3, .glass-card:hover p, .glass-card:hover h4, .glass-card:hover span { color: #ffffff !important; }
-        .glass-card:hover .border-t { border-color: rgba(255, 255, 255, 0.2) !important; }
-        .glass-card:hover button { background-color: #ffffff !important; color: #991b1b !important; }
-
-        .glass-modal { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(24px); border: 1px solid rgba(0, 0, 0, 0.1); }
-        .glass-input { background: rgba(0, 0, 0, 0.03); border: 1px solid rgba(0, 0, 0, 0.12); color: #1e293b; }
-        .glass-input:focus { background: #ffffff; border-color: #991b1b; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 via-slate-100 to-zinc-200 text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen">
 
-    <!-- SCREEN 1: HALAMAN LOGIN -->
-    <div id="login-screen" class="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-slate-900 via-red-950 to-black p-4">
-        <div class="bg-white/10 backdrop-blur-md border border-white/10 p-8 rounded-2xl max-w-sm w-full text-center shadow-2xl">
-            <div class="w-14 h-14 bg-gradient-to-tr from-rose-600 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-xl mx-auto mb-4">J</div>
-            <h2 class="text-xl font-bold text-white tracking-tight">Internal Job Portal</h2>
-            <p class="text-xs text-slate-300 mt-1 mb-8">Silakan masuk menggunakan akun Google Perusahaan Anda untuk mengeksplorasi peluang karier.</p>
-            <button onclick="loginWithGoogle()" class="w-full flex items-center justify-center space-x-3 bg-white hover:bg-slate-100 text-slate-800 font-semibold py-3 px-4 rounded-xl text-sm transition-all shadow-lg active:scale-95">
-                <svg class="w-5 h-5" viewBox="0 0 24 24">
-                    <path fill="#EA4335" d="M12 5.04c1.64 0 3.12.56 4.28 1.67l3.2-3.2C17.52 1.58 14.98 1 12 1 7.24 1 3.2 3.73 1.24 7.72l3.84 2.98C6.01 7.22 8.78 5.04 12 5.04z"/>
-                    <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.29 1.48-1.14 2.73-2.4 3.58l3.73 2.89c2.18-2.01 3.7-4.99 3.7-8.62z"/>
-                    <path fill="#FBBC05" d="M5.08 14.7a7.14 7.14 0 0 1 0-4.41L1.24 7.31a11.93 11.93 0 0 0 0 9.37l3.84-2.98z"/>
-                    <path fill="#34A853" d="M12 23c3.24 0 5.97-1.08 7.96-2.91l-3.73-2.89c-1.04.7-2.38 1.11-4.23 1.11-3.22 0-5.99-2.18-6.96-5.11L1.19 16.18C3.14 20.27 7.21 23 12 23z"/>
-                </svg>
-                <span>Masuk dengan Google</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- SCREEN: PROFILE SETUP (DISEDERHANAKAN) -->
+    <!-- ========================================== -->
+    <!-- SCREEN: PROFILE SETUP (DISEDERHANAKAN 3 PERTANYAAN) -->
+    <!-- ========================================== -->
     <div id="profile-setup-screen" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
         <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-white/40 transform transition-all space-y-6">
             <div class="text-center space-y-2">
@@ -148,7 +49,7 @@
                 <!-- Kondisional NPP -->
                 <div id="setup-npp-container" class="hidden transition-all duration-300">
                     <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nomor Pokok Pegawai (NPP) <span class="text-rose-600">*</span></label>
-                    <input type="text" id="setup-npp" placeholder="Masukkan 5 atau 6 digit NPP Anda" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-800/20 transition-all">
+                    <input type="text" id="setup-npp" placeholder="Masukkan digit NPP Anda" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-800/20 transition-all">
                 </div>
 
                 <!-- 3. No Whatsapp -->
@@ -165,100 +66,102 @@
         </div>
     </div>
 
-    <!-- SCREEN 2: MAIN PORTAL -->
-    <div id="main-portal" class="hidden flex-1 flex flex-col">
-        <header class="bg-slate-900/90 backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
-            <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+    <!-- ========================================== -->
+    <!-- PORTAL UTAMA -->
+    <!-- ========================================== -->
+    <div id="main-portal" class="hidden">
+        <!-- HEADER / NAVIGATION -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                    <div class="w-9 h-9 bg-gradient-to-tr from-rose-600 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">J</div>
-                    <span class="text-lg font-bold tracking-tight text-white">Job<span class="text-rose-400">Board</span></span>
+                    <span class="bg-rose-800 text-white px-3 py-1.5 rounded-xl font-bold text-sm tracking-wider">ADHI</span>
+                    <h1 class="text-sm font-bold text-slate-900 tracking-tight hidden sm:block">Internal Job Posting</h1>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <div class="text-right hidden sm:block">
-                        <p class="text-[10px] text-slate-400 font-medium">Logged in as:</p>
-                        <p id="user-email" class="text-xs text-white font-semibold">loading...</p>
-                    </div>
-                    <button onclick="openEditProfileModal()" class="text-xs bg-slate-800 hover:bg-slate-700 text-white font-semibold px-4 py-2 rounded-lg border border-slate-700 transition-colors">
-                        Profil Diri
-                    </button>
-                    <button onclick="logout()" class="text-xs bg-white/10 hover:bg-rose-900/40 text-slate-200 hover:text-white px-3 py-2 rounded-lg border border-white/10 transition-colors">Logout</button>
-                </div>
+                <button onclick="openEditProfileModal()" class="flex items-center space-x-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs px-4 py-2 rounded-xl transition-all">
+                    <span>👤 Edit Profil Diri</span>
+                </button>
             </div>
         </header>
 
-        <main class="max-w-6xl mx-auto px-6 py-16 flex-1 w-full">
-            <div class="max-w-2xl mb-10">
-                <h1 class="text-3xl font-extrabold text-red-950 tracking-tight sm:text-4xl mb-3">Eksplorasi Peluang Karier Internal</h1>
-                <p class="text-base text-slate-600 leading-relaxed">Kembangkan potensi dirimu!</p>
-            </div>
-
-            <!-- TABS STATUS LOWONGAN -->
-            <div class="flex space-x-2 border-b border-slate-200 mb-8 shrink-0">
-                <button onclick="switchStatusTab('open')" id="tab-open" class="px-5 py-2.5 text-sm font-bold border-b-2 border-rose-800 text-rose-800 transition-all">
-                    Open Vacant Position (<span id="count-open">0</span>)
+        <!-- KONTEN -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+            <!-- STATUS TAB STATUS LOWONGAN -->
+            <div class="flex border-b border-slate-200 max-w-md">
+                <button id="tab-open" onclick="switchStatusTab('open')" class="px-5 py-2.5 text-sm font-bold border-b-2 border-rose-800 text-rose-800 transition-all">
+                    Lowongan Aktif (<span id="count-open">0</span>)
                 </button>
-                <button onclick="switchStatusTab('closed')" id="tab-closed" class="px-5 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all">
-                    Closed Vacant Position (<span id="count-closed">0</span>)
+                <button id="tab-closed" onclick="switchStatusTab('closed')" class="px-5 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all">
+                    Sudah Ditutup (<span id="count-closed">0</span>)
                 </button>
             </div>
 
-            <!-- CONTAINER UTAMA SCORE CARD -->
-            <div id="job-container" class="space-y-12">
-                <div id="loading-state" class="text-center py-16 glass-card rounded-2xl">
-                    <div class="inline-block animate-spin rounded-full h-7 w-7 border-3 border-rose-500 border-t-transparent mb-3"></div>
-                    <p class="text-slate-400 text-sm font-medium">Sinkronisasi data lowongan...</p>
-                </div>
+            <!-- LOADING STATE SKELETON -->
+            <div id="loading-state" class="space-y-4">
+                <div class="h-24 bg-slate-200 animate-pulse rounded-2xl"></div>
+                <div class="h-24 bg-slate-200 animate-pulse rounded-2xl"></div>
             </div>
+
+            <!-- CONTAINER LIST DATA LOWONGAN -->
+            <div id="job-container" class="space-y-6"></div>
         </main>
     </div>
 
-    <!-- MODAL: EDIT PROFILE (TANPA WAJIB ISI UNTUK PERTANYAAN LAIN) -->
+    <!-- ========================================== -->
+    <!-- MODAL: EDIT PROFILE (2 SUB-PAGE VIA TAB KLIK) -->
+    <!-- ========================================== -->
     <div id="edit-profile-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-40 hidden transition-all">
-        <div id="edit-profile-box" class="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 shadow-2xl border border-slate-100 transform scale-95 opacity-0 transition-all space-y-6">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+        <div id="edit-profile-box" class="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 shadow-2xl border border-slate-100 transform scale-95 opacity-0 transition-all space-y-4">
+            
+            <!-- HEADER -->
+            <div class="flex justify-between items-center border-b border-slate-100 pb-2">
                 <div>
                     <h3 class="text-base font-bold text-slate-900">Perbarui Profil Lengkap</h3>
-                    <p class="text-xs text-slate-400">Kelola informasi kompetensi Anda untuk mempermudah proses apply.</p>
+                    <p class="text-xs text-slate-400">Kelola informasi kompetensi Anda kapan saja.</p>
                 </div>
                 <button onclick="closeEditProfileModal()" class="text-slate-400 hover:text-slate-600 text-sm font-medium p-1.5 hover:bg-slate-50 rounded-lg transition-all">Tutup</button>
             </div>
 
-            <form id="edit-profile-form" onsubmit="handleProfileUpdateSubmit(event)" class="space-y-6">
-                <!-- BAGIAN 1: DATA UTAMA -->
-                <div class="space-y-4">
-                    <h4 class="text-xs font-bold text-rose-800 uppercase tracking-wider">Data Utama (Wajib)</h4>
+            <!-- SUB-PAGE TAB NAVIGATION (Bisa langsung diklik bebas untuk pindah) -->
+            <div class="flex border-b border-slate-200 select-none">
+                <div id="btn-subtab-1" onclick="switchProfileSubPage(1)" class="flex-1 text-center py-2.5 text-xs font-bold border-b-2 border-rose-800 text-rose-800 transition-all cursor-pointer">
+                    1. Data Utama & Penugasan
+                </div>
+                <div id="btn-subtab-2" onclick="switchProfileSubPage(2)" class="flex-1 text-center py-2.5 text-xs font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all cursor-pointer">
+                    2. Kompetensi & Sertifikasi
+                </div>
+            </div>
+
+            <form id="edit-profile-form" onsubmit="handleProfileUpdateSubmit(event)" class="space-y-6 pt-2">
+                
+                <!-- SUB-PAGE 1: DATA UTAMA & PENUGASAN -->
+                <div id="edit-subpage-1" class="space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Lengkap <span class="text-rose-600">*</span></label>
-                            <input type="text" id="edit-nama" required class="w-full px-3 py-2 text-xs glass-input rounded-xl focus:outline-none">
+                            <input type="text" id="edit-nama" required class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-800">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">No. WhatsApp <span class="text-rose-600">*</span></label>
-                            <input type="tel" id="edit-phone" required class="w-full px-3 py-2 text-xs glass-input rounded-xl focus:outline-none">
+                            <input type="tel" id="edit-phone" required class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-800">
                         </div>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1">Apakah Pegawai ADHI? <span class="text-rose-600">*</span></label>
-                            <select id="edit-is-adhi" required onchange="toggleNPPVisibility('edit')" class="w-full px-3 py-2 text-xs glass-input rounded-xl focus:outline-none bg-white">
+                            <select id="edit-is-adhi" required onchange="toggleNPPVisibility('edit')" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none bg-white">
                                 <option value="Tidak">Bukan / Tidak</option>
                                 <option value="Ya">Ya, Benar</option>
                             </select>
                         </div>
                         <div id="edit-npp-container" class="hidden">
                             <label class="block text-xs font-semibold text-slate-600 mb-1">NPP <span class="text-rose-600">*</span></label>
-                            <input type="text" id="edit-npp" class="w-full px-3 py-2 text-xs glass-input rounded-xl focus:outline-none">
+                            <input type="text" id="edit-npp" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none">
                         </div>
                     </div>
-                </div>
-
-                <!-- BAGIAN 2: DATA TAMBAHAN (TIDAK WAJIB ISI / OPTIONAL) -->
-                <div class="space-y-4 pt-4 border-t border-slate-100">
-                    <h4 class="text-xs font-bold text-rose-800 uppercase tracking-wider">Informasi Penugasan & Berkas (Opsional)</h4>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Lokasi Penugasan Saat Ini</label>
-                            <select id="edit-penugasan" class="w-full px-3 py-2 text-xs glass-input rounded-xl focus:outline-none bg-white">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Lokasi Penugasan Saat Ini (Opsional)</label>
+                            <select id="edit-penugasan" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none bg-white">
                                 <option value="">-- Pilih Lokasi --</option>
                                 <option value="Kantor Pusat">Kantor Pusat</option>
                                 <option value="Divisi / Infrastruktur">Divisi / Infrastruktur</option>
@@ -268,64 +171,63 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Atasan Langsung</label>
-                            <input type="text" id="edit-atasan" placeholder="Nama Atasan / Project Manager" class="w-full px-3 py-2 text-xs glass-input rounded-xl focus:outline-none">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Atasan Langsung (Opsional)</label>
+                            <input type="text" id="edit-atasan" placeholder="Nama Atasan / PM" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none">
                         </div>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Durasi Penugasan di Posisi Sekarang</label>
-                            <input type="text" id="edit-durasi" placeholder="Contoh: 2 Tahun 3 Bulan" class="w-full px-3 py-2 text-xs glass-input rounded-xl focus:outline-none">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Durasi Penugasan (Opsional)</label>
+                            <input type="text" id="edit-durasi" placeholder="Contoh: 2 Tahun 3 Bulan" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Link CV Terupdate <span class="text-[10px] text-slate-400">(https://...)</span></label>
-                            <input type="url" id="edit-cv" placeholder="https://drive.google.com/..." class="w-full px-3 py-2 text-xs glass-input rounded-xl focus:outline-none">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Link CV Terupdate (Opsional)</label>
+                            <input type="url" id="edit-cv" placeholder="https://drive.google.com/..." class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none">
                         </div>
                     </div>
                 </div>
 
-                <!-- BAGIAN 3: SERTIFIKASI -->
-                <div class="space-y-4 pt-4 border-t border-slate-100">
+                <!-- SUB-PAGE 2: KOMPETENSI / SERTIFIKASI (TIDAK WAJIB ISI) -->
+                <div id="edit-subpage-2" class="space-y-4 hidden">
                     <div class="flex justify-between items-center">
-                        <h4 class="text-xs font-bold text-rose-800 uppercase tracking-wider">Sertifikasi & Keahlian (Opsional)</h4>
-                        <button type="button" onclick="addCertificationField('edit')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2.5 py-1 rounded-lg transition-all">+ Tambah</button>
+                        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Daftar Sertifikasi Keahlian</h4>
+                        <button type="button" onclick="addCertificationField('edit')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-xl transition-all">+ Tambah Sertifikasi</button>
                     </div>
-                    <div id="edit-certifications-container" class="space-y-3">
+                    <div id="edit-certifications-container" class="space-y-3 min-h-[100px]">
                         <!-- Kontainer Sertifikasi Dinamis -->
                     </div>
                 </div>
 
-                <!-- BUTTON SIMPAN -->
+                <!-- FOOTER BUTTONS -->
                 <div class="pt-4 border-t border-slate-100 flex justify-end space-x-2">
                     <button type="button" onclick="closeEditProfileModal()" class="px-4 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-50 rounded-xl transition-all">Batal</button>
-                    <button type="submit" class="px-5 py-2 text-xs font-bold bg-red-800 hover:bg-red-900 text-white rounded-xl shadow-md transition-all">Simpan Perubahan</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold bg-red-800 hover:bg-red-900 text-white rounded-xl shadow-md transition-all">Simpan Profil</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- POP-UP MODAL FORMULIR LAMARAN -->
-    <div id="apply-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4 transition-all duration-300">
-        <div class="glass-modal rounded-2xl max-w-xl w-full shadow-2xl max-h-[85vh] flex flex-col transform transition-all scale-95 opacity-0 duration-200" id="modal-box">
-            <div class="flex justify-between items-start p-6 border-b border-slate-200 shrink-0">
+    <!-- ========================================== -->
+    <!-- MODAL: FORM SUBMIT APPLY LOWONGAN -->
+    <!-- ========================================== -->
+    <div id="apply-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-40 hidden transition-all">
+        <div id="modal-box" class="bg-white rounded-3xl max-w-xl w-full max-h-[85vh] overflow-y-auto p-6 shadow-2xl border border-slate-100 transform scale-95 opacity-0 transition-all space-y-6">
+            <div class="flex justify-between items-start border-b border-slate-100 pb-4">
                 <div>
-                    <h3 class="text-xl font-bold text-slate-900" id="modal-job-title">Apply Job</h3>
-                    <p class="text-xs font-semibold text-rose-700 mt-0.5" id="modal-job-company">Perusahaan</p>
+                    <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold uppercase tracking-wide" id="modal-job-company">-</span>
+                    <h3 class="text-base font-extrabold text-slate-900 mt-1" id="modal-job-title">Screening Form</h3>
                 </div>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-sm font-medium p-1.5 hover:bg-slate-50 rounded-lg &quot;">Tutup</button>
             </div>
-            
-            <form id="screening-form" onsubmit="handleFormSubmit(event)" class="space-y-6 overflow-y-auto p-6 flex-1 custom-scroll">
-                <div class="p-4 bg-red-50 border border-red-100 rounded-xl space-y-3">
-                    <div>
-                        <h4 class="text-xs font-bold text-red-950 uppercase tracking-wide">Aktivitas Utama Pekerjaan:</h4>
-                        <p id="modal-job-aktivitas" class="text-xs text-slate-700 mt-1 leading-relaxed whitespace-pre-line"></p>
-                    </div>
-                </div>
 
-                <!-- Hidden inputs mengambil data dari Local Storage secara otomatis -->
+            <!-- Detail Aktivitas -->
+            <div class="p-4 bg-amber-50/50 border border-amber-200/60 rounded-2xl space-y-1">
+                <h4 class="text-xs font-bold text-amber-900">Deskripsi Aktivitas Pekerjaan:</h4>
+                <p class="text-xs text-amber-800 leading-relaxed" id="modal-job-aktivitas">-</p>
+            </div>
+
+            <form id="screening-form" onsubmit="handleFormSubmit(event)" class="space-y-5">
+                <!-- Data Hidden untuk Simpan Profil Ter-Autofill -->
                 <input type="hidden" id="form-nama">
                 <input type="hidden" id="form-is-adhi">
                 <input type="hidden" id="form-npp">
@@ -336,33 +238,30 @@
                 <input type="hidden" id="form-cv">
                 <input type="hidden" id="form-certs">
 
-                <div class="space-y-4 pt-2">
-                    <div class="flex items-center space-x-2 mb-1">
-                        <span class="w-1 h-4 bg-gradient-to-b from-rose-500 to-purple-500 rounded-full"></span>
-                        <p class="text-xs font-bold text-slate-900 uppercase tracking-wider">1. Self Assessment Kualifikasi</p>
-                    </div>
+                <!-- Dynamic Requirement Screening -->
+                <div class="space-y-3">
+                    <label class="block text-xs font-bold text-slate-800 uppercase tracking-wide">Self Assessment Kualifikasi</label>
+                    <p class="text-[11px] text-slate-500">Centang kualifikasi yang Anda miliki lalu geser slider kecocokan kompetensi Anda:</p>
                     <div id="dynamic-requirement-container" class="space-y-3"></div>
                 </div>
 
-                <div class="space-y-4 pt-4 border-t border-slate-200">
-                    <div class="flex items-center space-x-2 mb-2">
-                        <span class="w-1 h-4 bg-gradient-to-b from-rose-500 to-purple-500 rounded-full"></span>
-                        <p class="text-xs font-bold text-slate-900 uppercase tracking-wider">2. Motivasi Lamaran</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5">Mengapa Anda tertarik menduduki posisi ini? <span class="text-rose-600">*</span></label>
-                        <textarea required id="form-alasan" rows="3" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-500 transition-all resize-none placeholder:text-slate-400" placeholder="Tuliskan alasan profesional Anda..."></textarea>
-                    </div>
+                <!-- Alasan Melamar -->
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-slate-800 uppercase tracking-wide">Alasan Melamar Posisi Ini <span class="text-rose-600">*</span></label>
+                    <textarea id="form-alasan" required rows="3" placeholder="Jelaskan secara singkat kenapa Anda merasa cocok dengan posisi ini..." class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-800 bg-white"></textarea>
+                </div>
+
+                <div class="pt-2 flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-50 rounded-xl">Batal</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold bg-red-800 hover:bg-red-900 text-white rounded-xl shadow-md">Kirim Lamaran</button>
                 </div>
             </form>
-
-            <div class="p-6 flex space-x-3 border-t border-slate-200 shrink-0 bg-slate-50 rounded-b-2xl">
-                <button type="button" onclick="closeModal()" class="w-1/2 bg-white hover:bg-slate-100 text-slate-700 font-semibold py-2.5 rounded-xl text-sm border border-slate-300 transition-colors">Batal</button>
-                <button type="button" onclick="document.getElementById('screening-form').requestSubmit()" class="w-1/2 bg-gradient-to-r from-rose-600 to-purple-600 text-white font-semibold py-2.5 rounded-xl text-sm transition-all shadow-lg shadow-purple-950/30">Kirim Lamaran</button>
-            </div>
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- LOGIKA JAVASCRIPT -->
+    <!-- ========================================== -->
     <script>
         const SPREADSHEET_ID = '1gd6VUH334-0Kx3HCF2ZBnOyiShoOSaJbmTyvxIlesdU'; 
         const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=job`;
@@ -373,23 +272,54 @@
         let allJobsData = [];
         let currentStatusFilter = 'open';
 
-        // PENGATURAN TAMPILAN FILTER NPP (KONDISIONAL YA/TIDAK)
+        // Cek LocalStorage pas pertama kali buka
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedProfile = localStorage.getItem('user_profile_completed');
+            if (savedProfile) {
+                document.getElementById('profile-setup-screen').classList.add('hidden');
+                document.getElementById('main-portal').classList.remove('hidden');
+                fetchJobs();
+            }
+        });
+
+        // NAVIGASI SUB-PAGE PROFILE VIA TAB KLIKS
+        function switchProfileSubPage(pageNumber) {
+            const btnTab1 = document.getElementById('btn-subtab-1');
+            const btnTab2 = document.getElementById('btn-subtab-2');
+            const subPage1 = document.getElementById('edit-subpage-1');
+            const subPage2 = document.getElementById('edit-subpage-2');
+
+            if (pageNumber === 1) {
+                btnTab1.className = "flex-1 text-center py-2.5 text-xs font-bold border-b-2 border-rose-800 text-rose-800 transition-all cursor-pointer";
+                btnTab2.className = "flex-1 text-center py-2.5 text-xs font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all cursor-pointer";
+                subPage1.classList.remove('hidden');
+                subPage2.classList.add('hidden');
+            } else {
+                btnTab1.className = "flex-1 text-center py-2.5 text-xs font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all cursor-pointer";
+                btnTab2.className = "flex-1 text-center py-2.5 text-xs font-bold border-b-2 border-rose-800 text-rose-800 transition-all cursor-pointer";
+                subPage1.classList.add('hidden');
+                subPage2.classList.remove('hidden');
+            }
+        }
+
         function toggleNPPVisibility(prefix) {
             const isAdhiVal = document.getElementById(`${prefix}-is-adhi`).value;
             const nppContainer = document.getElementById(`${prefix}-npp-container`);
             const nppInput = document.getElementById(`${prefix}-npp`);
             
             if (isAdhiVal === 'Ya') {
-                nppContainer.classList.remove('hidden'); 
-                nppInput.setAttribute('required', 'required');
+                if(nppContainer) nppContainer.classList.remove('hidden'); 
+                if(nppInput) nppInput.setAttribute('required', 'required');
             } else {
-                nppContainer.classList.add('hidden'); 
-                nppInput.removeAttribute('required'); 
-                nppInput.value = '';
+                if(nppContainer) nppContainer.classList.add('hidden'); 
+                if(nppInput) {
+                    nppInput.removeAttribute('required'); 
+                    nppInput.value = '';
+                }
             }
         }
 
-        // SIMPAN DATA SETUP AWAL (HANYA 3 DATA)
+        // SIMPAN DATA SETUP AWAL (3 DATA UTAMA)
         function handleProfileSetupSubmit(event) {
             event.preventDefault();
 
@@ -398,7 +328,6 @@
                 isAdhi: document.getElementById('setup-is-adhi').value,
                 npp: document.getElementById('setup-npp').value,
                 phone: document.getElementById('setup-phone').value,
-                // Data sisa di-default kosong agar user bisa isi kapan saja via edit profile
                 penugasan: '',
                 atasan: '',
                 durasi: '',
@@ -412,18 +341,20 @@
             fetchJobs();
         }
 
-        // BUKA MODAL EDIT PROFIL (MEMASUKKAN DATA LOCALSTORAGE JIKA ADA)
+        // BUKA MODAL EDIT PROFILE
         function openEditProfileModal() {
+            switchProfileSubPage(1); 
             const savedProfile = JSON.parse(localStorage.getItem('user_profile_completed'));
+            
             if (savedProfile) {
-                document.getElementById('edit-nama').value = savedProfile.nama || '';
-                document.getElementById('edit-is-adhi').value = savedProfile.isAdhi || 'Tidak';
-                document.getElementById('edit-npp').value = savedProfile.npp || '';
-                document.getElementById('edit-phone').value = savedProfile.phone || '';
-                document.getElementById('edit-penugasan').value = savedProfile.penugasan || '';
-                document.getElementById('edit-atasan').value = savedProfile.atasan || '';
-                document.getElementById('edit-durasi').value = savedProfile.durasi || '';
-                document.getElementById('edit-cv').value = savedProfile.cvLink || '';
+                if(document.getElementById('edit-nama')) document.getElementById('edit-nama').value = savedProfile.nama || '';
+                if(document.getElementById('edit-is-adhi')) document.getElementById('edit-is-adhi').value = savedProfile.isAdhi || 'Tidak';
+                if(document.getElementById('edit-npp')) document.getElementById('edit-npp').value = savedProfile.npp || '';
+                if(document.getElementById('edit-phone')) document.getElementById('edit-phone').value = savedProfile.phone || '';
+                if(document.getElementById('edit-penugasan')) document.getElementById('edit-penugasan').value = savedProfile.penugasan || '';
+                if(document.getElementById('edit-atasan')) document.getElementById('edit-atasan').value = savedProfile.atasan || '';
+                if(document.getElementById('edit-durasi')) document.getElementById('edit-durasi').value = savedProfile.durasi || '';
+                if(document.getElementById('edit-cv')) document.getElementById('edit-cv').value = savedProfile.cvLink || '';
                 
                 toggleNPPVisibility('edit');
                 initDefaultCertifications('edit', savedProfile.certifications || null);
@@ -433,18 +364,22 @@
             
             const modal = document.getElementById('edit-profile-modal');
             const box = document.getElementById('edit-profile-box');
-            modal.classList.remove('hidden');
-            setTimeout(() => { box.classList.remove('scale-95', 'opacity-0'); box.classList.add('scale-100', 'opacity-100'); }, 50);
+            if(modal && box) {
+                modal.classList.remove('hidden');
+                setTimeout(() => { box.classList.remove('scale-95', 'opacity-0'); box.classList.add('scale-100', 'opacity-100'); }, 50);
+            }
         }
 
         function closeEditProfileModal() {
             const modal = document.getElementById('edit-profile-modal');
             const box = document.getElementById('edit-profile-box');
-            box.classList.remove('scale-100', 'opacity-100'); box.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => { modal.classList.add('hidden'); }, 200);
+            if(modal && box) {
+                box.classList.remove('scale-100', 'opacity-100'); box.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => { modal.classList.add('hidden'); }, 200);
+            }
         }
 
-        // SIMPAN PERUBAHAN PROFILE DAN DATA OPSIONAL
+        // UPDATE SELURUH PROFIL DATA
         function handleProfileUpdateSubmit(event) {
             event.preventDefault();
             const certsData = extractCertificationsData('edit');
@@ -462,27 +397,27 @@
             };
             
             localStorage.setItem('user_profile_completed', JSON.stringify(updatedData));
-            alert("Profil Diri Anda berhasil diperbarui!");
+            alert("Profil Anda berhasil diperbarui!");
             closeEditProfileModal();
         }
 
-        // SERTIFIKASI DINAMIS (OPSIONAL)
+        // FUNGSI SERTIFIKASI DINAMIS
         function initDefaultCertifications(prefix, data = null) {
             const container = document.getElementById(`${prefix}-certifications-container`);
+            if(!container) return;
             container.innerHTML = '';
             
             if(data && data.length > 0) {
                 data.forEach((cert) => addCertificationField(prefix, cert.nama, cert.expired, cert.link));
             } else {
-                // Di edit profile modal, jika kosong biarkan tidak memunculkan field default agar tidak memaksa input
-                container.innerHTML = `<p class="text-xs text-slate-400 italic py-2 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">Belum ada sertifikasi yang ditambahkan.</p>`;
+                container.innerHTML = `<p class="text-xs text-slate-400 italic py-4 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">Belum ada sertifikasi yang ditambahkan.</p>`;
             }
         }
 
         function addCertificationField(prefix, nama="", expired="", link="") {
             const container = document.getElementById(`${prefix}-certifications-container`);
+            if(!container) return;
             
-            // Hapus text 'Belum ada sertifikasi' jika ada sebelum menambah field baru
             if(container.querySelector('p')) { container.innerHTML = ''; }
 
             const index = container.children.length;
@@ -496,21 +431,21 @@
                 <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 relative group/item">
                     <div class="flex justify-between items-center">
                         <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Sertifikasi #${index + 1}</span>
-                        <button type="button" onclick="this.parentElement.parentElement.remove(); if(document.getElementById('${prefix}-certifications-container').children.length === 0){document.getElementById('${prefix}-certifications-container').innerHTML = '<p class=\'text-xs text-slate-400 italic py-2 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200\'>Belum ada sertifikasi yang ditambahkan.</p>';}" class="text-xs text-rose-600 hover:text-rose-800 font-semibold">Hapus</button>
+                        <button type="button" onclick="this.parentElement.parentElement.remove(); if(document.getElementById('${prefix}-certifications-container').children.length === 0){document.getElementById('${prefix}-certifications-container').innerHTML = '<p class=\'text-xs text-slate-400 italic py-4 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200\'>Belum ada sertifikasi yang ditambahkan.</p>';}" class="text-xs text-rose-600 hover:text-rose-800 font-semibold">Hapus</button>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="block text-[10px] font-semibold text-slate-500 mb-1">Nama Sertifikasi</label>
-                            <input type="text" placeholder="Contoh: SKA Ahli Muda" value="${nama}" class="cert-nama w-full px-3 py-1.5 text-xs glass-input rounded-lg focus:outline-none">
+                            <input type="text" placeholder="Contoh: SKA Ahli Muda" value="${nama}" class="cert-nama w-full px-3 py-1.5 text-xs rounded-lg focus:outline-none bg-white border border-slate-200">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Masa Berakhir (DD-MM-YYYY)</label>
-                            <input type="date" value="${formattedDate}" class="cert-expired w-full px-3 py-1.5 text-xs glass-input rounded-lg focus:outline-none">
+                            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Masa Berakhir</label>
+                            <input type="date" value="${formattedDate}" class="cert-expired w-full px-3 py-1.5 text-xs rounded-lg focus:outline-none bg-white border border-slate-200">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-semibold text-slate-500 mb-1">Link Sertifikasi <span class="text-[9px] text-slate-400">(Wajib awalan https://)</span></label>
-                        <input type="url" pattern="https://.*" placeholder="https://drive.google.com/..." value="${link}" class="cert-link w-full px-3 py-1.5 text-xs glass-input rounded-lg focus:outline-none">
+                        <label class="block text-[10px] font-semibold text-slate-500 mb-1">Link Berkas Sertifikasi (https://)</label>
+                        <input type="url" pattern="https://.*" placeholder="https://drive.google.com/..." value="${link}" class="cert-link w-full px-3 py-1.5 text-xs rounded-lg focus:outline-none bg-white border border-slate-200">
                     </div>
                 </div>
             `;
@@ -519,15 +454,19 @@
 
         function extractCertificationsData(prefix) {
             const container = document.getElementById(`${prefix}-certifications-container`);
-            if(container.querySelector('p')) return [];
+            if(!container || container.querySelector('p')) return [];
             
             const items = container.children;
             let certsArray = [];
 
             for(let i=0; i<items.length; i++) {
-                const nama = items[i].querySelector('.cert-nama').value.trim();
-                const rawDate = items[i].querySelector('.cert-expired').value;
-                const link = items[i].querySelector('.cert-link').value.trim();
+                const namaInput = items[i].querySelector('.cert-nama');
+                const dateInput = items[i].querySelector('.cert-expired');
+                const linkInput = items[i].querySelector('.cert-link');
+
+                const nama = namaInput ? namaInput.value.trim() : "";
+                const rawDate = dateInput ? dateInput.value : "";
+                const link = linkInput ? linkInput.value.trim() : "";
 
                 let expiredFormatted = "";
                 if(rawDate) {
@@ -545,179 +484,21 @@
             return certsArray;
         }
 
-        function toggleNPPVisibility(prefix) {
-            const isAdhiVal = document.getElementById(`${prefix}-is-adhi`).value;
-            const nppContainer = document.getElementById(`${prefix}-npp-container`);
-            const nppInput = document.getElementById(`${prefix}-npp`);
-            
-            if (isAdhiVal === 'Ya') {
-                nppContainer.classList.remove('hidden'); nppInput.setAttribute('required', 'required');
-            } else {
-                nppContainer.classList.add('hidden'); nppInput.removeAttribute('required'); nppInput.value = '';
-            }
-        }
-
-        // FUNGSI DINAMIS MANAJEMEN SERTIFIKASI
-        function initDefaultCertifications(prefix, data = null) {
-            const container = document.getElementById(`${prefix}-certifications-container`);
-            container.innerHTML = '';
-            
-            if(data && data.length > 0) {
-                data.forEach((cert, idx) => addCertificationField(prefix, cert.nama, cert.expired, cert.link));
-            } else {
-                addCertificationField(prefix);
-                addCertificationField(prefix);
-            }
-        }
-
-        function addCertificationField(prefix, nama="", expired="", link="") {
-            const container = document.getElementById(`${prefix}-certifications-container`);
-            const index = container.children.length;
-            
-            let formattedDate = "";
-            if (expired && expired.includes('-')) {
-                const parts = expired.split('-');
-                if(parts[2] && parts[2].length === 4) formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
-            }
-
-            const html = `
-                <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 relative group/item">
-                    <div class="flex justify-between items-center">
-                        <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wide">Sertifikasi #${index + 1}</span>
-                        ${index >= 2 ? `<button type="button" onclick="this.parentElement.parentElement.remove()" class="text-xs text-rose-600 hover:text-rose-800 font-semibold">Hapus</button>` : ''}
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Nama Sertifikasi</label>
-                            <input type="text" placeholder="Contoh: SKA Ahli Muda" value="${nama}" class="cert-nama w-full px-3 py-1.5 text-xs glass-input rounded-lg focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-semibold text-slate-500 mb-1">Masa Berakhir (DD-MM-YYYY)</label>
-                            <input type="date" value="${formattedDate}" class="cert-expired w-full px-3 py-1.5 text-xs glass-input rounded-lg focus:outline-none">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-semibold text-slate-500 mb-1">Link Sertifikasi <span class="text-[9px] text-slate-400">(Wajib awalan https://)</span></label>
-                        <input type="url" pattern="https://.*" placeholder="https://drive.google.com/..." value="${link}" class="cert-link w-full px-3 py-1.5 text-xs glass-input rounded-lg focus:outline-none">
-                    </div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', html);
-        }
-
-        function extractCertificationsData(prefix) {
-            const container = document.getElementById(`${prefix}-certifications-container`);
-            const items = container.children;
-            let certsArray = [];
-
-            for(let i=0; i<items.length; i++) {
-                const nama = items[i].querySelector('.cert-nama').value.trim();
-                const rawDate = items[i].querySelector('.cert-expired').value;
-                const link = items[i].querySelector('.cert-link').value.trim();
-
-                let expiredFormatted = "";
-                if(rawDate) {
-                    const d = new Date(rawDate);
-                    const day = String(d.getDate()).padStart(2, '0');
-                    const month = String(d.getMonth() + 1).padStart(2, '0');
-                    const year = d.getFullYear();
-                    expiredFormatted = `${day}-${month}-${year}`;
-                }
-
-                if(nama || expiredFormatted || link) {
-                    certsArray.push({ nama: nama, expired: expiredFormatted, link: link });
-                }
-            }
-            return certsArray;
-        }
-
-        function handleProfileSetupSubmit(event) {
-            event.preventDefault();
-            const certsData = extractCertificationsData('setup');
-
-            const profileData = {
-                nama: document.getElementById('setup-nama').value,
-                isAdhi: document.getElementById('setup-is-adhi').value,
-                npp: document.getElementById('setup-npp').value,
-                phone: document.getElementById('setup-phone').value,
-                penugasan: document.getElementById('setup-penugasan').value,
-                atasan: document.getElementById('setup-atasan').value,
-                durasi: document.getElementById('setup-durasi').value,
-                cvLink: document.getElementById('setup-cv').value,
-                certifications: certsData
-            };
-            
-            localStorage.setItem('user_profile_completed', JSON.stringify(profileData));
-            document.getElementById('profile-setup-screen').classList.add('hidden');
-            document.getElementById('main-portal').classList.remove('hidden');
-            fetchJobs();
-        }
-
-        function openEditProfileModal() {
-            navigatePage('edit', 1);
-            const savedProfile = JSON.parse(localStorage.getItem('user_profile_completed'));
-            if (savedProfile) {
-                document.getElementById('edit-nama').value = savedProfile.nama || '';
-                document.getElementById('edit-is-adhi').value = savedProfile.isAdhi || '';
-                document.getElementById('edit-npp').value = savedProfile.npp || '';
-                document.getElementById('edit-phone').value = savedProfile.phone || '';
-                document.getElementById('edit-penugasan').value = savedProfile.penugasan || '';
-                document.getElementById('edit-atasan').value = savedProfile.atasan || '';
-                document.getElementById('edit-durasi').value = savedProfile.durasi || '';
-                document.getElementById('edit-cv').value = savedProfile.cvLink || '';
-                
-                toggleNPPVisibility('edit');
-                initDefaultCertifications('edit', savedProfile.certifications || null);
-            }
-            
-            const modal = document.getElementById('edit-profile-modal');
-            const box = document.getElementById('edit-profile-box');
-            modal.classList.remove('hidden');
-            setTimeout(() => { box.classList.remove('scale-95', 'opacity-0'); box.classList.add('scale-100', 'opacity-100'); }, 50);
-        }
-
-        function closeEditProfileModal() {
-            const modal = document.getElementById('edit-profile-modal');
-            const box = document.getElementById('edit-profile-box');
-            box.classList.remove('scale-100', 'opacity-100'); box.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => { modal.classList.add('hidden'); }, 200);
-        }
-
-        function handleProfileUpdateSubmit(event) {
-            event.preventDefault();
-            const certsData = extractCertificationsData('edit');
-
-            const updatedData = {
-                nama: document.getElementById('edit-nama').value,
-                isAdhi: document.getElementById('edit-is-adhi').value,
-                npp: document.getElementById('edit-npp').value,
-                phone: document.getElementById('edit-phone').value,
-                penugasan: document.getElementById('edit-penugasan').value,
-                atasan: document.getElementById('edit-atasan').value,
-                durasi: document.getElementById('edit-durasi').value,
-                cvLink: document.getElementById('edit-cv').value,
-                certifications: certsData
-            };
-            
-            localStorage.setItem('user_profile_completed', JSON.stringify(updatedData));
-            alert("Profil Diri Anda berhasil diperbarui!");
-            closeEditProfileModal();
-        }
-
+        // PROSES TRANSAKSI APPLY
         function toggleRequirementSlider(index) {
             const checkBox = document.getElementById(`req-item-${index}-check`);
             const slider = document.getElementById(`req-item-${index}-range`);
             const indicator = document.getElementById(`slider-val-${index}`);
             const sliderWrapper = document.getElementById(`wrapper-slider-${index}`);
 
-            if (checkBox.checked) {
-                slider.disabled = false; slider.value = 50; indicator.innerText = "50%";
-                indicator.classList.remove('text-slate-400'); indicator.classList.add('text-rose-600');
-                sliderWrapper.classList.remove('opacity-30');
+            if (checkBox && checkBox.checked) {
+                if(slider) { slider.disabled = false; slider.value = 50; }
+                if(indicator) { indicator.innerText = "50%"; indicator.classList.remove('text-slate-400'); indicator.classList.add('text-rose-600'); }
+                if(sliderWrapper) sliderWrapper.classList.remove('opacity-30');
             } else {
-                slider.disabled = true; slider.value = 0; indicator.innerText = "0%";
-                indicator.classList.remove('text-rose-600'); indicator.classList.add('text-slate-400');
-                sliderWrapper.classList.add('opacity-30');
+                if(slider) { slider.disabled = true; slider.value = 0; }
+                if(indicator) { indicator.innerText = "0%"; indicator.classList.remove('text-rose-600'); indicator.classList.add('text-slate-400'); }
+                if(sliderWrapper) sliderWrapper.classList.add('opacity-30');
             }
         }
 
@@ -734,14 +515,14 @@
 
             const savedProfile = JSON.parse(localStorage.getItem('user_profile_completed'));
             if (savedProfile) {
-                document.getElementById('form-nama').value = savedProfile.nama;
-                document.getElementById('form-is-adhi').value = savedProfile.isAdhi;
-                document.getElementById('form-npp').value = savedProfile.npp;
-                document.getElementById('form-phone').value = savedProfile.phone;
-                document.getElementById('form-penugasan').value = savedProfile.penugasan;
-                document.getElementById('form-atasan').value = savedProfile.atasan;
-                document.getElementById('form-durasi').value = savedProfile.durasi;
-                document.getElementById('form-cv').value = savedProfile.cvLink;
+                document.getElementById('form-nama').value = savedProfile.nama || '';
+                document.getElementById('form-is-adhi').value = savedProfile.isAdhi || 'Tidak';
+                document.getElementById('form-npp').value = savedProfile.npp || '';
+                document.getElementById('form-phone').value = savedProfile.phone || '';
+                document.getElementById('form-penugasan').value = savedProfile.penugasan || '';
+                document.getElementById('form-atasan').value = savedProfile.atasan || '';
+                document.getElementById('form-durasi').value = savedProfile.durasi || '';
+                document.getElementById('form-cv').value = savedProfile.cvLink || '';
                 
                 let certsString = "Tidak Ada";
                 if(savedProfile.certifications && savedProfile.certifications.length > 0){
@@ -751,37 +532,41 @@
             }
             
             const reqContainer = document.getElementById('dynamic-requirement-container');
-            reqContainer.innerHTML = ''; 
-            const reqList = requirement.split('|').map(item => item.trim()).filter(item => item.length > 0);
+            if(reqContainer) {
+                reqContainer.innerHTML = ''; 
+                const reqList = requirement.split('|').map(item => item.trim()).filter(item => item.length > 0);
 
-            reqList.forEach((reqText, index) => {
-                const uniqueId = `req-item-${index}`;
-                const sliderId = `slider-val-${index}`;
-                reqContainer.insertAdjacentHTML('beforeend', `
-                    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5 transition-all">
-                        <label class="flex items-start cursor-pointer group">
-                            <input type="checkbox" id="${uniqueId}-check" value="${reqText}" onchange="toggleRequirementSlider(${index})" class="mt-0.5 w-4 h-4 text-rose-600 border-slate-300 bg-white rounded focus:ring-rose-500 cursor-pointer">
-                            <span class="ml-3 text-xs text-slate-700 font-medium leading-relaxed group-hover:text-black">${reqText}</span>
-                        </label>
-                        <div class="pl-7 flex items-center space-x-3 opacity-30" id="wrapper-slider-${index}">
-                            <input type="range" min="0" max="100" value="0" id="${uniqueId}-range" disabled oninput="document.getElementById('${sliderId}').innerText = this.value + '%'" class="w-full h-1 bg-slate-200 rounded-lg appearance-none accent-rose-500 disabled:cursor-not-allowed">
-                            <span class="text-xs font-bold text-slate-400 min-w-[35px] text-right" id="${sliderId}">0%</span>
+                reqList.forEach((reqText, index) => {
+                    reqContainer.insertAdjacentHTML('beforeend', `
+                        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5 transition-all">
+                            <label class="flex items-start cursor-pointer group">
+                                <input type="checkbox" id="req-item-${index}-check" value="${reqText}" onchange="toggleRequirementSlider(${index})" class="mt-0.5 w-4 h-4 text-rose-600 border-slate-300 bg-white rounded focus:ring-rose-500 cursor-pointer">
+                                <span class="ml-3 text-xs text-slate-700 font-medium leading-relaxed group-hover:text-black">${reqText}</span>
+                            </label>
+                            <div class="pl-7 flex items-center space-x-3 opacity-30" id="wrapper-slider-${index}">
+                                <input type="range" min="0" max="100" value="0" id="req-item-${index}-range" disabled oninput="document.getElementById('slider-val-${index}').innerText = this.value + '%'" class="w-full h-1 bg-slate-200 rounded-lg appearance-none accent-rose-500 disabled:cursor-not-allowed">
+                                <span class="text-xs font-bold text-slate-400 min-w-[35px] text-right" id="slider-val-${index}">0%</span>
+                            </div>
                         </div>
-                    </div>
-                `);
-            });
+                    `);
+                });
+            }
             
             const modal = document.getElementById('apply-modal');
             const box = document.getElementById('modal-box');
-            modal.classList.remove('hidden');
-            setTimeout(() => { box.classList.remove('scale-95', 'opacity-0'); box.classList.add('scale-100', 'opacity-100'); }, 50);
+            if(modal && box) {
+                modal.classList.remove('hidden');
+                setTimeout(() => { box.classList.remove('scale-95', 'opacity-0'); box.classList.add('scale-100', 'opacity-100'); }, 50);
+            }
         }
 
         function closeModal() {
             const modal = document.getElementById('apply-modal');
             const box = document.getElementById('modal-box');
-            box.classList.remove('scale-100', 'opacity-100'); box.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => { modal.classList.add('hidden'); document.getElementById('screening-form').reset(); }, 200);
+            if(modal && box) {
+                box.classList.remove('scale-100', 'opacity-100'); box.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => { modal.classList.add('hidden'); document.getElementById('screening-form').reset(); }, 200);
+            }
         }
 
         function handleFormSubmit(event) {
@@ -800,11 +585,14 @@
 
             let assessmentSummary = [];
             const container = document.getElementById('dynamic-requirement-container');
-            for(let i = 0; i < container.children.length; i++) {
-                const isChecked = document.getElementById(`req-item-${i}-check`).checked;
-                const reqName = document.getElementById(`req-item-${i}-check`).value;
-                const score = document.getElementById(`req-item-${i}-range`).value;
-                assessmentSummary.push(`${reqName}: ${score}% (${isChecked ? 'Sesuai' : 'Tidak Sesuai'})`);
+            if(container) {
+                for(let i = 0; i < container.children.length; i++) {
+                    const checkEl = document.getElementById(`req-item-${i}-check`);
+                    const rangeEl = document.getElementById(`req-item-${i}-range`);
+                    if(checkEl && rangeEl) {
+                        assessmentSummary.push(`${checkEl.value}: ${rangeEl.value}% (${checkEl.checked ? 'Sesuai' : 'Tidak Sesuai'})`);
+                    }
+                }
             }
             
             const namaDanStatusPegawai = isAdhi === 'Ya' ? `${nama} (Pegawai ADHI - NPP: ${npp})` : `${nama} (Bukan Pegawai ADHI)`;
@@ -824,24 +612,19 @@
             .catch(err => { console.error(err); alert('Terjadi kesalahan saat mengirim data.'); });
         }
 
-        // ==========================================
-        // LOGIKA BARU UNTUK SCORE CARD BERDASARKAN STATUS & DEPARTEMEN & LOKASI
-        // ==========================================
-
+        // TAMPILAN FILTER DATA SHEET UTAMA
         function switchStatusTab(status) {
             currentStatusFilter = status;
-            
             const tabOpen = document.getElementById('tab-open');
             const tabClosed = document.getElementById('tab-closed');
             
             if (status === 'open') {
-                tabOpen.className = "px-5 py-2.5 text-sm font-bold border-b-2 border-rose-800 text-rose-800 transition-all";
-                tabClosed.className = "px-5 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all";
+                if(tabOpen) tabOpen.className = "px-5 py-2.5 text-sm font-bold border-b-2 border-rose-800 text-rose-800 transition-all";
+                if(tabClosed) tabClosed.className = "px-5 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all";
             } else {
-                tabOpen.className = "px-5 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all";
-                tabClosed.className = "px-5 py-2.5 text-sm font-bold border-b-2 border-rose-800 text-rose-800 transition-all";
+                if(tabOpen) tabOpen.className = "px-5 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all";
+                if(tabClosed) tabClosed.className = "px-5 py-2.5 text-sm font-bold border-b-2 border-rose-800 text-rose-800 transition-all";
             }
-            
             renderGroupedJobs();
         }
 
@@ -854,7 +637,7 @@
                 const data = JSON.parse(text.substr(47).slice(0, -2));
                 
                 if (!data.table || !data.table.rows || data.table.rows.length === 0) {
-                    container.innerHTML = '<p class="text-center text-slate-500 py-8">Belum ada lowongan yang tersedia.</p>';
+                    if(container) container.innerHTML = '<p class="text-center text-slate-500 py-8">Belum ada lowongan yang tersedia.</p>';
                     return;
                 }
 
@@ -874,10 +657,8 @@
                     if (!row || !row.c) return;
                     const jabatan = (idxJabatan !== -1 && row.c[idxJabatan]) ? String(row.c[idxJabatan].v) : 'Posisi Tidak Terbaca';
                     const departemen = (idxDepartemen !== -1 && row.c[idxDepartemen]) ? String(row.c[idxDepartemen].v) : 'Umum';
-                    
                     let penugasanRaw = (idxPenugasan !== -1 && row.c[idxPenugasan]) ? String(row.c[idxPenugasan].v) : 'Kantor';
                     let penugasan = penugasanRaw.toLowerCase().includes('proyek') ? 'Proyek' : 'Kantor';
-                    
                     const aktivitas = (idxAktivitas !== -1 && row.c[idxAktivitas]) ? String(row.c[idxAktivitas].v) : 'Detail aktivitas belum diisi.';
                     const requirement = (idxRequirement !== -1 && row.c[idxRequirement]) ? String(row.c[idxRequirement].v) : '';
                     let statusRaw = (idxStatus !== -1 && row.c[idxStatus] && row.c[idxStatus].v) ? String(row.c[idxStatus].v).trim() : 'Open';
@@ -885,24 +666,23 @@
 
                     if (status === 'open') openCount++; else closedCount++;
 
-                    allJobsData.push({
-                        jabatan, departemen, penugasan, aktivitas, requirement, status
-                    });
+                    allJobsData.push({ jabatan, departemen, penugasan, aktivitas, requirement, status });
                 });
 
-                document.getElementById('count-open').innerText = openCount;
-                document.getElementById('count-closed').innerText = closedCount;
+                if(document.getElementById('count-open')) document.getElementById('count-open').innerText = openCount;
+                if(document.getElementById('count-closed')) document.getElementById('count-closed').innerText = closedCount;
 
                 renderGroupedJobs();
 
             } catch (error) {
                 console.error(error);
-                container.innerHTML = '<p class="text-center text-rose-600 py-8">Gagal memuat lowongan kerja.</p>';
+                if(container) container.innerHTML = '<p class="text-center text-rose-600 py-8">Gagal memuat lowongan kerja.</p>';
             } finally { if (skeleton) skeleton.classList.add('hidden'); }
         }
 
         function renderGroupedJobs() {
             const container = document.getElementById('job-container');
+            if(!container) return;
             container.innerHTML = '';
 
             const filteredJobs = allJobsData.filter(j => j.status === currentStatusFilter);
