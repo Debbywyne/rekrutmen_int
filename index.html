@@ -20,26 +20,32 @@
 <body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen">
 
     <!-- ========================================== -->
-    <!-- SCREEN: PROFILE SETUP (DISEDERHANAKAN 3 PERTANYAAN) -->
+    <!-- SCREEN: INITIAL LOGIN & SETUP PROFILE -->
     <!-- ========================================== -->
     <div id="profile-setup-screen" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
         <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-white/40 transform transition-all space-y-6">
             <div class="text-center space-y-2">
                 <div class="inline-flex p-3 bg-rose-50 rounded-2xl text-rose-800 font-bold text-xl tracking-wider">ADHI</div>
-                <h2 class="text-xl font-extrabold text-slate-950 tracking-tight">Lengkapi Profil Singkat</h2>
-                <p class="text-xs text-slate-500">Yuk, isi 3 data berikut untuk mulai melihat lowongan yang tersedia.</p>
+                <h2 class="text-xl font-extrabold text-slate-950 tracking-tight">Login Portal Karir</h2>
+                <p class="text-xs text-slate-500">Silakan masukkan email dan lengkapi profil singkat Anda.</p>
             </div>
 
             <form id="profile-setup-form" onsubmit="handleProfileSetupSubmit(event)" class="space-y-4">
+                <!-- 0. Email User (Sistem Login) -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Email Aktif <span class="text-rose-600">*</span></label>
+                    <input type="email" id="setup-email" required placeholder="Contoh: user@gmail.com" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-800/20 transition-all">
+                </div>
+
                 <!-- 1. Nama Lengkap -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">1. Nama Lengkap (Sesuai KTP) <span class="text-rose-600">*</span></label>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nama Lengkap (Sesuai KTP) <span class="text-rose-600">*</span></label>
                     <input type="text" id="setup-nama" required placeholder="Contoh: Adi Wijaya" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-800/20 transition-all">
                 </div>
 
                 <!-- 2. Status Pegawai ADHI -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">2. Apakah Saudara/i saat ini merupakan pegawai ADHI? <span class="text-rose-600">*</span></label>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Apakah Saudara/i saat ini merupakan pegawai ADHI? <span class="text-rose-600">*</span></label>
                     <select id="setup-is-adhi" required onchange="toggleNPPVisibility('setup')" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-800/20 transition-all cursor-pointer bg-white">
                         <option value="Tidak">Bukan / Tidak</option>
                         <option value="Ya">Ya, Benar</option>
@@ -54,12 +60,12 @@
 
                 <!-- 3. No Whatsapp -->
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">3. No. WhatsApp Aktif <span class="text-rose-600">*</span></label>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">No. WhatsApp Aktif <span class="text-rose-600">*</span></label>
                     <input type="tel" id="setup-phone" required placeholder="Contoh: 08123456789" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-800/20 transition-all">
                 </div>
 
-                <button type="submit" class="w-full bg-red-800 hover:bg-red-900 text-white font-bold text-sm py-3 rounded-xl shadow-md shadow-rose-900/10 hover:shadow-lg transition-all flex items-center justify-center space-x-2 mt-2">
-                    <span>Masuk ke Portal</span>
+                <button type="submit" class="w-full bg-red-800 hover:bg-red-900 text-white font-bold text-sm py-3 rounded-xl shadow-md transition-all flex items-center justify-center space-x-2 mt-2">
+                    <span>Masuk & Login</span>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
                 </button>
             </form>
@@ -77,9 +83,19 @@
                     <span class="bg-rose-800 text-white px-3 py-1.5 rounded-xl font-bold text-sm tracking-wider">ADHI</span>
                     <h1 class="text-sm font-bold text-slate-900 tracking-tight hidden sm:block">Internal Job Posting</h1>
                 </div>
-                <button onclick="openEditProfileModal()" class="flex items-center space-x-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs px-4 py-2 rounded-xl transition-all">
-                    <span>👤 Edit Profil Diri</span>
-                </button>
+                
+                <!-- Akun Info & Aksi Navigasi -->
+                <div class="flex items-center space-x-3">
+                    <span id="user-display-email" class="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-2 rounded-xl border border-slate-200 hidden sm:inline-block">
+                        Logged in as: <b>-</b>
+                    </span>
+                    <button onclick="openEditProfileModal()" class="flex items-center space-x-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs px-3.5 py-2 rounded-xl transition-all">
+                        <span>👤 Edit Profil</span>
+                    </button>
+                    <button onclick="handleLogout()" class="flex items-center space-x-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs px-3.5 py-2 rounded-xl border border-rose-200 transition-all">
+                        <span>🚪 Logout</span>
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -217,7 +233,7 @@
                     <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold uppercase tracking-wide" id="modal-job-company">-</span>
                     <h3 class="text-base font-extrabold text-slate-900 mt-1" id="modal-job-title">Screening Form</h3>
                 </div>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-sm font-medium p-1.5 hover:bg-slate-50 rounded-lg &quot;">Tutup</button>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-sm font-medium p-1.5 hover:bg-slate-50 rounded-lg">Tutup</button>
             </div>
 
             <!-- Detail Aktivitas -->
@@ -228,6 +244,7 @@
 
             <form id="screening-form" onsubmit="handleFormSubmit(event)" class="space-y-5">
                 <!-- Data Hidden untuk Simpan Profil Ter-Autofill -->
+                <input type="hidden" id="form-email">
                 <input type="hidden" id="form-nama">
                 <input type="hidden" id="form-is-adhi">
                 <input type="hidden" id="form-npp">
@@ -272,17 +289,42 @@
         let allJobsData = [];
         let currentStatusFilter = 'open';
 
-        // Cek LocalStorage pas pertama kali buka
+        // Cek Keberadaan Session Login pas pertama kali buka halaman
         window.addEventListener('DOMContentLoaded', () => {
+            checkUserSession();
+        });
+
+        function checkUserSession() {
             const savedProfile = localStorage.getItem('user_profile_completed');
             if (savedProfile) {
+                const profileObj = JSON.parse(savedProfile);
+                
+                // Tempel Teks Login As Email di Navbar Header
+                const emailDisplay = document.getElementById('user-display-email');
+                if (emailDisplay && profileObj.email) {
+                    emailDisplay.innerHTML = `Logged in as: <b class="text-slate-800">${profileObj.email}</b>`;
+                }
+
                 document.getElementById('profile-setup-screen').classList.add('hidden');
                 document.getElementById('main-portal').classList.remove('hidden');
                 fetchJobs();
+            } else {
+                document.getElementById('profile-setup-screen').classList.remove('hidden');
+                document.getElementById('main-portal').classList.add('hidden');
             }
-        });
+        }
 
-        // NAVIGASI SUB-PAGE PROFILE VIA TAB KLIKS
+        // PROSES LOGOUT USER
+        function handleLogout() {
+            if (confirm("Apakah Anda yakin ingin keluar dari akun saat ini?")) {
+                localStorage.removeItem('user_profile_completed');
+                document.getElementById('profile-setup-form').reset();
+                document.getElementById('setup-npp-container').classList.add('hidden');
+                checkUserSession(); // Singkronisasi ulang tampilan ke form login awal
+            }
+        }
+
+        // NAVIGASI SUB-PAGE PROFILE VIA TAB KLIKS (BISA KLIK BEBAS BEBAS)
         function switchProfileSubPage(pageNumber) {
             const btnTab1 = document.getElementById('btn-subtab-1');
             const btnTab2 = document.getElementById('btn-subtab-2');
@@ -319,11 +361,12 @@
             }
         }
 
-        // SIMPAN DATA SETUP AWAL (3 DATA UTAMA)
+        // SIMPAN DATA SETUP AWAL + LOGIN EMAIL
         function handleProfileSetupSubmit(event) {
             event.preventDefault();
 
             const profileData = {
+                email: document.getElementById('setup-email').value,
                 nama: document.getElementById('setup-nama').value,
                 isAdhi: document.getElementById('setup-is-adhi').value,
                 npp: document.getElementById('setup-npp').value,
@@ -336,9 +379,7 @@
             };
             
             localStorage.setItem('user_profile_completed', JSON.stringify(profileData));
-            document.getElementById('profile-setup-screen').classList.add('hidden');
-            document.getElementById('main-portal').classList.remove('hidden');
-            fetchJobs();
+            checkUserSession(); // Update status session login ke halaman utama
         }
 
         // BUKA MODAL EDIT PROFILE
@@ -379,12 +420,14 @@
             }
         }
 
-        // UPDATE SELURUH PROFIL DATA
+        // UPDATE PROFILE (DATA BARU AKAN MENYATU TANPA MENGAPUS EMAIL ASAL)
         function handleProfileUpdateSubmit(event) {
             event.preventDefault();
+            const savedProfile = JSON.parse(localStorage.getItem('user_profile_completed')) || {};
             const certsData = extractCertificationsData('edit');
 
             const updatedData = {
+                email: savedProfile.email || '', // Pertahankan email asli login
                 nama: document.getElementById('edit-nama').value,
                 isAdhi: document.getElementById('edit-is-adhi').value,
                 npp: document.getElementById('edit-npp').value,
@@ -399,9 +442,10 @@
             localStorage.setItem('user_profile_completed', JSON.stringify(updatedData));
             alert("Profil Anda berhasil diperbarui!");
             closeEditProfileModal();
+            checkUserSession();
         }
 
-        // FUNGSI SERTIFIKASI DINAMIS
+        // FUNGSI SERTIFIKASI DINAMIS SUBPAGE 2
         function initDefaultCertifications(prefix, data = null) {
             const container = document.getElementById(`${prefix}-certifications-container`);
             if(!container) return;
@@ -484,7 +528,7 @@
             return certsArray;
         }
 
-        // PROSES TRANSAKSI APPLY
+        // PROSES TRANSAKSI SUBMIT APPLY
         function toggleRequirementSlider(index) {
             const checkBox = document.getElementById(`req-item-${index}-check`);
             const slider = document.getElementById(`req-item-${index}-range`);
@@ -515,6 +559,7 @@
 
             const savedProfile = JSON.parse(localStorage.getItem('user_profile_completed'));
             if (savedProfile) {
+                document.getElementById('form-email').value = savedProfile.email || '';
                 document.getElementById('form-nama').value = savedProfile.nama || '';
                 document.getElementById('form-is-adhi').value = savedProfile.isAdhi || 'Tidak';
                 document.getElementById('form-npp').value = savedProfile.npp || '';
@@ -572,6 +617,7 @@
         function handleFormSubmit(event) {
             event.preventDefault();
             
+            const email = document.getElementById('form-email').value;
             const nama = document.getElementById('form-nama').value;
             const isAdhi = document.getElementById('form-is-adhi').value;
             const npp = document.getElementById('form-npp').value;
@@ -598,6 +644,7 @@
             const namaDanStatusPegawai = isAdhi === 'Ya' ? `${nama} (Pegawai ADHI - NPP: ${npp})` : `${nama} (Bukan Pegawai ADHI)`;
 
             const payload = {
+                email: email, 
                 nama: namaDanStatusPegawai, 
                 phone: phone, 
                 penugasan: penugasan, 
