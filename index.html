@@ -339,6 +339,17 @@
             temporaryEmailToken = googleUserData.email;
             const googleName = googleUserData.name || '';
 
+            // Cek apakah perangkat ini sudah punya profil dengan email yang sama di localStorage
+            const localData = localStorage.getItem('user_profile_completed');
+            if (localData) {
+                const profileObj = JSON.parse(localData);
+                // Jika emailnya sama dengan akun Google yang baru login, langsung masukkan tanpa isi ulang
+                if (profileObj.email === temporaryEmailToken) {
+                    checkUserSession();
+                    return;
+                }
+            }
+
             // Sembunyikan Screen Login Google, Buka Screen 3 Pertanyaan Profil
             document.getElementById('login-google-screen').classList.add('hidden');
             document.getElementById('profile-setup-screen').classList.remove('hidden');
@@ -369,7 +380,7 @@
             }
         }
 
-        // PROSES SUBMIT 3 PERTANYAAN PROFIL DIRI
+        // PROSES SUBMIT 3 PERTANYAAN PROFIL DIRI (SIMPAN LOCALSTORAGE)
         function handleProfileSetupSubmit(event) {
             event.preventDefault();
 
@@ -377,7 +388,7 @@
                 email: temporaryEmailToken,
                 nama: document.getElementById('setup-nama').value,
                 isAdhi: document.getElementById('setup-is-adhi').value,
-                npp: document.getElementById('setup-npp').value,
+                npp: document.getElementById('setup-npp').value || '',
                 phone: document.getElementById('setup-phone').value,
                 penugasan: '',
                 atasan: '',
@@ -478,7 +489,7 @@
             }
         }
 
-        // UPDATE PROFIL
+        // UPDATE PROFIL (SIMPAN LOCALSTORAGE)
         function handleProfileUpdateSubmit(event) {
             event.preventDefault();
             const savedProfile = JSON.parse(localStorage.getItem('user_profile_completed')) || {};
