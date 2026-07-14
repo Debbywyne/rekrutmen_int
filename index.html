@@ -6,8 +6,6 @@
     <title>Portal Lowongan Kerja ADHI</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Identity Services (OAuth) Library -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         .glass-input {
             background: rgba(255, 255, 255, 0.8);
@@ -22,25 +20,31 @@
 <body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen">
 
     <!-- ========================================== -->
-    <!-- SCREEN 1: AUTENTIKASI LOGIN BY GMAIL -->
+    <!-- SCREEN 1: AUTENTIKASI LOGIN BY EMAIL (BYPASS OAUTH) -->
     <!-- ========================================== -->
     <div id="login-google-screen" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 z-50">
         <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-white/40 text-center space-y-6">
             <div class="space-y-2">
                 <div class="inline-flex p-3 bg-rose-50 rounded-2xl text-rose-800 font-bold text-xl tracking-wider">ADHI</div>
                 <h2 class="text-xl font-extrabold text-slate-950 tracking-tight">Portal Internal Job Posting</h2>
-                <p class="text-xs text-slate-500">Silakan masuk menggunakan akun Gmail aktif Anda terlebih dahulu.</p>
+                <p class="text-xs text-slate-500">Silakan masukkan email aktif Anda untuk melanjutkan.</p>
             </div>
 
-            <!-- Google Sign-In Button Container -->
-            <div class="flex justify-center py-4">
-                <div id="google-btn-wrapper"></div>
-            </div>
+            <form onsubmit="handleManualLogin(event)" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Alamat Email <span class="text-rose-600">*</span></label>
+                    <input type="email" id="login-email-input" required placeholder="nama@gmail.com" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-800/20 transition-all">
+                </div>
+                <button type="submit" class="w-full bg-red-800 hover:bg-red-900 text-white font-bold text-sm py-3 rounded-xl shadow-md transition-all flex items-center justify-center space-x-2">
+                    <span>Lanjutkan</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                </button>
+            </form>
         </div>
     </div>
 
     <!-- ========================================== -->
-    <!-- SCREEN 2: 3 PERTANYAAN PROFIL DIRI (SETELAH GMAIL AUTH) -->
+    <!-- SCREEN 2: 3 PERTANYAAN PROFIL DIRI (AWAL) -->
     <!-- ========================================== -->
     <div id="profile-setup-screen" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden overflow-y-auto">
         <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-white/40 space-y-6">
@@ -50,13 +54,10 @@
             </div>
 
             <form id="profile-setup-form" onsubmit="handleProfileSetupSubmit(event)" class="space-y-4">
-                <!-- Pertanyaan Profil 1: Nama Lengkap -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1.5">1. Nama Lengkap (Sesuai KTP) <span class="text-rose-600">*</span></label>
                     <input type="text" id="setup-nama" required placeholder="Contoh: Adi Wijaya" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-800/20 transition-all">
                 </div>
-
-                <!-- Pertanyaan Profil 2: Status Pegawai ADHI -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1.5">2. Apakah Saudara/i saat ini merupakan pegawai ADHI? <span class="text-rose-600">*</span></label>
                     <select id="setup-is-adhi" required onchange="toggleNPPVisibility('setup')" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-800/20 transition-all cursor-pointer bg-white">
@@ -64,14 +65,10 @@
                         <option value="Ya">Ya, Benar</option>
                     </select>
                 </div>
-
-                <!-- Kondisional NPP (Bagian dari Pertanyaan 2 jika memilih Ya) -->
                 <div id="setup-npp-container" class="hidden transition-all duration-300">
                     <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nomor Pokok Pegawai (NPP) <span class="text-rose-600">*</span></label>
                     <input type="text" id="setup-npp" placeholder="Masukkan digit NPP Anda" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-800/20 transition-all">
                 </div>
-
-                <!-- Pertanyaan Profil 3: No Whatsapp -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1.5">3. No. WhatsApp Aktif <span class="text-rose-600">*</span></label>
                     <input type="tel" id="setup-phone" required placeholder="Contoh: 08123456789" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-800/20 transition-all">
@@ -89,7 +86,6 @@
     <!-- PORTAL UTAMA -->
     <!-- ========================================== -->
     <div id="main-portal" class="hidden">
-        <!-- HEADER / NAVIGATION -->
         <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
@@ -97,7 +93,6 @@
                     <h1 class="text-sm font-bold text-slate-900 tracking-tight hidden sm:block">Internal Job Posting</h1>
                 </div>
                 
-                <!-- Info Akun Login & Tombol Aksi -->
                 <div class="flex items-center space-x-3">
                     <span id="user-display-email" class="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-2 rounded-xl border border-slate-200 hidden sm:inline-block">
                         Logged in as: <b>-</b>
@@ -105,7 +100,6 @@
                     <button onclick="openEditProfileModal()" class="flex items-center space-x-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs px-3.5 py-2 rounded-xl transition-all">
                         <span>👤 Kelola Profil</span>
                     </button>
-                    <!-- Tombol Logout -->
                     <button onclick="handleLogout()" class="flex items-center space-x-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs px-3.5 py-2 rounded-xl border border-rose-200 transition-all">
                         <span>🚪 Logout</span>
                     </button>
@@ -113,9 +107,7 @@
             </div>
         </header>
 
-        <!-- KONTEN UTAMA -->
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-            <!-- STATUS TAB STATUS LOWONGAN -->
             <div class="flex border-b border-slate-200 max-w-md">
                 <button id="tab-open" onclick="switchStatusTab('open')" class="px-5 py-2.5 text-sm font-bold border-b-2 border-rose-800 text-rose-800 transition-all">
                     Lowongan Aktif (<span id="count-open">0</span>)
@@ -125,24 +117,21 @@
                 </button>
             </div>
 
-            <!-- LOADING STATE SKELETON -->
             <div id="loading-state" class="space-y-4">
                 <div class="h-24 bg-slate-200 animate-pulse rounded-2xl"></div>
                 <div class="h-24 bg-slate-200 animate-pulse rounded-2xl"></div>
             </div>
 
-            <!-- CONTAINER LIST DATA LOWONGAN -->
             <div id="job-container" class="space-y-6"></div>
         </main>
     </div>
 
     <!-- ========================================== -->
-    <!-- MODAL: KELOLA PROFIL (2 SUB-PAGE VIA TAB KLIK) -->
+    <!-- MODAL: KELOLA PROFIL -->
     <!-- ========================================== -->
     <div id="edit-profile-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-40 hidden transition-all">
         <div id="edit-profile-box" class="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 shadow-2xl border border-slate-100 transform scale-95 opacity-0 transition-all space-y-4">
             
-            <!-- HEADER -->
             <div class="flex justify-between items-center border-b border-slate-100 pb-2">
                 <div>
                     <h3 class="text-base font-bold text-slate-900">Perbarui Profil Lengkap</h3>
@@ -151,7 +140,6 @@
                 <button onclick="closeEditProfileModal()" class="text-slate-400 hover:text-slate-600 text-sm font-medium p-1.5 hover:bg-slate-50 rounded-lg transition-all">Tutup</button>
             </div>
 
-            <!-- SUB-PAGE TAB NAVIGATION -->
             <div class="flex border-b border-slate-200 select-none">
                 <div id="btn-subtab-1" onclick="switchProfileSubPage(1)" class="flex-1 text-center py-2.5 text-xs font-bold border-b-2 border-rose-800 text-rose-800 transition-all cursor-pointer">
                     1. Data Utama & Penugasan
@@ -163,7 +151,6 @@
 
             <form id="edit-profile-form" onsubmit="handleProfileUpdateSubmit(event)" class="space-y-6 pt-2">
                 
-                <!-- SUB-PAGE 1: DATA UTAMA & PENUGASAN -->
                 <div id="edit-subpage-1" class="space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
@@ -217,7 +204,6 @@
                     </div>
                 </div>
 
-                <!-- SUB-PAGE 2: KOMPETENSI / SERTIFIKASI -->
                 <div id="edit-subpage-2" class="space-y-4 hidden">
                     <div class="flex justify-between items-center">
                         <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Daftar Sertifikasi Keahlian</h4>
@@ -226,7 +212,6 @@
                     <div id="edit-certifications-container" class="space-y-3 min-h-[100px]"></div>
                 </div>
 
-                <!-- FOOTER BUTTONS -->
                 <div class="pt-4 border-t border-slate-100 flex justify-end space-x-2">
                     <button type="button" onclick="closeEditProfileModal()" class="px-4 py-2 text-xs font-semibold text-slate-500 hover:bg-slate-50 rounded-xl transition-all">Batal</button>
                     <button type="submit" class="px-5 py-2 text-xs font-bold bg-red-800 hover:bg-red-900 text-white rounded-xl shadow-md transition-all">Simpan Profil</button>
@@ -254,7 +239,6 @@
             </div>
 
             <form id="screening-form" onsubmit="handleFormSubmit(event)" class="space-y-5">
-                <!-- Data Hidden Profil Ter-Autofill -->
                 <input type="hidden" id="form-email">
                 <input type="hidden" id="form-nama">
                 <input type="hidden" id="form-is-adhi">
@@ -266,14 +250,12 @@
                 <input type="hidden" id="form-cv">
                 <input type="hidden" id="form-certs">
 
-                <!-- Dynamic Requirement Screening -->
                 <div class="space-y-3">
                     <label class="block text-xs font-bold text-slate-800 uppercase tracking-wide">Self Assessment Kualifikasi</label>
                     <p class="text-[11px] text-slate-500">Centang kualifikasi yang Anda miliki lalu geser slider kecocokan kompetensi Anda:</p>
                     <div id="dynamic-requirement-container" class="space-y-3"></div>
                 </div>
 
-                <!-- Alasan Melamar -->
                 <div class="space-y-1.5">
                     <label class="block text-xs font-bold text-slate-800 uppercase tracking-wide">Alasan Melamar Posisi Ini <span class="text-rose-600">*</span></label>
                     <textarea id="form-alasan" required rows="3" placeholder="Jelaskan singkat mengapa Anda merasa cocok..." class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-rose-800 bg-white"></textarea>
@@ -288,87 +270,56 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- LOGIKA JAVASCRIPT & AUTENTIKASI GOOGLE -->
+    <!-- LOGIKA JAVASCRIPT -->
     <!-- ========================================== -->
     <script>
         const SPREADSHEET_ID = '1gd6VUH334-0Kx3HCF2ZBnOyiShoOSaJbmTyvxIlesdU'; 
         const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=job`;
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyb2UyLIbmhwKeoP-mAfpq5sTvO5WyG1rkbVVyoEsalmOd3IoUDJwu9VEvqanshSuX6_w/exec'; 
 
-        // GANTI INI dengan Client ID Google Cloud Anda sendiri agar OAuth berfungsi penuh di domain produksi
-        const GOOGLE_CLIENT_ID = '1018903517527-b8sp68q2l2lmrrr1dej0vomn91gq6rgl.apps.googleusercontent.com'; 
-
         let currentActiveJob = null;
         let currentActiveCompany = null;
         let allJobsData = [];
         let currentStatusFilter = 'open';
-        let temporaryEmailToken = ''; // Menyimpan email hasil login Google sementara
+        let temporaryEmailToken = ''; 
 
-        // Inisialisasi Google Auth & Cek Sesi
         window.onload = function () {
-            // 1. Inisialisasi Pustaka Google Sign-In
-            try {
-                google.accounts.id.initialize({
-                    client_id: GOOGLE_CLIENT_ID,
-                    callback: handleCredentialResponse
-                });
-                google.accounts.id.renderButton(
-                    document.getElementById("google-btn-wrapper"),
-                    { theme: "outline", size: "large", text: "signin_with" }
-                );
-            } catch (e) {
-                console.warn("Google API GSI failed to load. Make sure Client ID is valid.", e);
-            }
-
-            // 2. Periksa Sesi Keaktifan User
             checkUserSession();
         };
 
-        // CALLBACK SETELAH USER BERHASIL LOGIN BY GMAIL
-        function handleCredentialResponse(response) {
-            // Mendekode payload JWT Token dari Google
-            const base64Url = response.credential.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-
-            const googleUserData = JSON.parse(jsonPayload);
+        function handleManualLogin(event) {
+            event.preventDefault();
+            const emailInput = document.getElementById('login-email-input').value.trim();
             
-            // Dapatkan email dan nama bawaan dari akun Google
-            temporaryEmailToken = googleUserData.email;
-            const googleName = googleUserData.name || '';
+            if (emailInput) {
+                temporaryEmailToken = emailInput;
+                const autoName = emailInput.split('@')[0].replace(/[^a-zA-Z]/g, ' ');
+                const formattedName = autoName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
-            // Cek apakah perangkat ini sudah punya profil dengan email yang sama di localStorage
-            const localData = localStorage.getItem('user_profile_completed');
-            if (localData) {
-                const profileObj = JSON.parse(localData);
-                // Jika emailnya sama dengan akun Google yang baru login, langsung masukkan tanpa isi ulang
-                if (profileObj.email === temporaryEmailToken) {
-                    checkUserSession();
-                    return;
+                const localData = localStorage.getItem('user_profile_completed');
+                if (localData) {
+                    const profileObj = JSON.parse(localData);
+                    if (profileObj.email === temporaryEmailToken && profileObj.nama && profileObj.phone) {
+                        checkUserSession();
+                        return;
+                    }
                 }
-            }
 
-            // Sembunyikan Screen Login Google, Buka Screen 3 Pertanyaan Profil
-            document.getElementById('login-google-screen').classList.add('hidden');
-            document.getElementById('profile-setup-screen').classList.remove('hidden');
-            
-            document.getElementById('setup-display-email').innerText = temporaryEmailToken;
-            document.getElementById('setup-nama').value = googleName;
+                document.getElementById('login-google-screen').classList.add('hidden');
+                document.getElementById('profile-setup-screen').classList.remove('hidden');
+                document.getElementById('setup-display-email').innerText = temporaryEmailToken;
+                document.getElementById('setup-nama').value = formattedName;
+            }
         }
 
-        // CEK APAKAH PROFIL LENGKAP SUDAH TERSIMPAN
         function checkUserSession() {
             const savedProfile = localStorage.getItem('user_profile_completed');
             if (savedProfile) {
                 const profileObj = JSON.parse(savedProfile);
-                
                 const emailDisplay = document.getElementById('user-display-email');
                 if (emailDisplay && profileObj.email) {
                     emailDisplay.innerHTML = `Logged in as: <b class="text-slate-800">${profileObj.email}</b>`;
                 }
-
                 document.getElementById('login-google-screen').classList.add('hidden');
                 document.getElementById('profile-setup-screen').classList.add('hidden');
                 document.getElementById('main-portal').classList.remove('hidden');
@@ -380,43 +331,30 @@
             }
         }
 
-        // PROSES SUBMIT 3 PERTANYAAN PROFIL DIRI (SIMPAN LOCALSTORAGE)
         function handleProfileSetupSubmit(event) {
             event.preventDefault();
-
             const profileData = {
                 email: temporaryEmailToken,
-                nama: document.getElementById('setup-nama').value,
+                nama: document.getElementById('setup-nama').value.trim(),
                 isAdhi: document.getElementById('setup-is-adhi').value,
                 npp: document.getElementById('setup-npp').value || '',
-                phone: document.getElementById('setup-phone').value,
-                penugasan: '',
-                atasan: '',
-                durasi: '',
-                cvLink: '',
-                certifications: []
+                phone: document.getElementById('setup-phone').value.trim(),
+                penugasan: '', atasan: '', durasi: '', cvLink: '', certifications: []
             };
-            
             localStorage.setItem('user_profile_completed', JSON.stringify(profileData));
             checkUserSession();
         }
 
-        // PROSES LOGOUT USER
         function handleLogout() {
-            if (confirm("Apakah Anda yakin ingin logout dari akun Gmail ini?")) {
+            if (confirm("Apakah Anda yakin ingin logout?")) {
                 localStorage.removeItem('user_profile_completed');
                 temporaryEmailToken = '';
                 document.getElementById('profile-setup-form').reset();
                 document.getElementById('setup-npp-container').classList.add('hidden');
-                
-                // Google Credential Sign out revoker
-                try { google.accounts.id.disableAutoSelect(); } catch(e){}
-                
                 checkUserSession(); 
             }
         }
 
-        // SWITCH SUB-PAGE DI MODAL PROFIL
         function switchProfileSubPage(pageNumber) {
             const btnTab1 = document.getElementById('btn-subtab-1');
             const btnTab2 = document.getElementById('btn-subtab-2');
@@ -446,18 +384,13 @@
                 if(nppInput) nppInput.setAttribute('required', 'required');
             } else {
                 if(nppContainer) nppContainer.classList.add('hidden'); 
-                if(nppInput) {
-                    nppInput.removeAttribute('required'); 
-                    nppInput.value = '';
-                }
+                if(nppInput) { nppInput.removeAttribute('required'); nppInput.value = ''; }
             }
         }
 
-        // BUKA MODAL EDIT PROFILE
         function openEditProfileModal() {
             switchProfileSubPage(1); 
             const savedProfile = JSON.parse(localStorage.getItem('user_profile_completed'));
-            
             if (savedProfile) {
                 if(document.getElementById('edit-nama')) document.getElementById('edit-nama').value = savedProfile.nama || '';
                 if(document.getElementById('edit-is-adhi')) document.getElementById('edit-is-adhi').value = savedProfile.isAdhi || 'Tidak';
@@ -467,11 +400,9 @@
                 if(document.getElementById('edit-atasan')) document.getElementById('edit-atasan').value = savedProfile.atasan || '';
                 if(document.getElementById('edit-durasi')) document.getElementById('edit-durasi').value = savedProfile.durasi || '';
                 if(document.getElementById('edit-cv')) document.getElementById('edit-cv').value = savedProfile.cvLink || '';
-                
                 toggleNPPVisibility('edit');
                 initDefaultCertifications('edit', savedProfile.certifications || null);
             }
-            
             const modal = document.getElementById('edit-profile-modal');
             const box = document.getElementById('edit-profile-box');
             if(modal && box) {
@@ -489,7 +420,6 @@
             }
         }
 
-        // UPDATE PROFIL (SIMPAN LOCALSTORAGE)
         function handleProfileUpdateSubmit(event) {
             event.preventDefault();
             const savedProfile = JSON.parse(localStorage.getItem('user_profile_completed')) || {};
@@ -497,29 +427,26 @@
 
             const updatedData = {
                 email: savedProfile.email || '', 
-                nama: document.getElementById('edit-nama').value,
+                nama: document.getElementById('edit-nama').value.trim(),
                 isAdhi: document.getElementById('edit-is-adhi').value,
                 npp: document.getElementById('edit-npp').value,
-                phone: document.getElementById('edit-phone').value,
+                phone: document.getElementById('edit-phone').value.trim(),
                 penugasan: document.getElementById('edit-penugasan').value,
                 atasan: document.getElementById('edit-atasan').value,
                 durasi: document.getElementById('edit-durasi').value,
                 cvLink: document.getElementById('edit-cv').value,
                 certifications: certsData
             };
-            
             localStorage.setItem('user_profile_completed', JSON.stringify(updatedData));
             alert("Profil Anda berhasil diperbarui!");
             closeEditProfileModal();
             checkUserSession();
         }
 
-        // DINAMIS SERTIFIKASI
         function initDefaultCertifications(prefix, data = null) {
             const container = document.getElementById(`${prefix}-certifications-container`);
             if(!container) return;
             container.innerHTML = '';
-            
             if(data && data.length > 0) {
                 data.forEach((cert) => addCertificationField(prefix, cert.nama, cert.expired, cert.link));
             } else {
@@ -530,7 +457,6 @@
         function addCertificationField(prefix, nama="", expired="", link="") {
             const container = document.getElementById(`${prefix}-certifications-container`);
             if(!container) return;
-            
             if(container.querySelector('p')) { container.innerHTML = ''; }
             const index = container.children.length;
             let formattedDate = "";
@@ -567,19 +493,15 @@
         function extractCertificationsData(prefix) {
             const container = document.getElementById(`${prefix}-certifications-container`);
             if(!container || container.querySelector('p')) return [];
-            
             const items = container.children;
             let certsArray = [];
-
             for(let i=0; i<items.length; i++) {
                 const namaInput = items[i].querySelector('.cert-nama');
                 const dateInput = items[i].querySelector('.cert-expired');
                 const linkInput = items[i].querySelector('.cert-link');
-
                 const nama = namaInput ? namaInput.value.trim() : "";
                 const rawDate = dateInput ? dateInput.value : "";
                 const link = linkInput ? linkInput.value.trim() : "";
-
                 let expiredFormatted = "";
                 if(rawDate) {
                     const d = new Date(rawDate);
@@ -588,7 +510,6 @@
                     const year = d.getFullYear();
                     expiredFormatted = `${day}-${month}-${year}`;
                 }
-
                 if(nama || expiredFormatted || link) {
                     certsArray.push({ nama: nama, expired: expiredFormatted, link: link });
                 }
@@ -596,7 +517,6 @@
             return certsArray;
         }
 
-        // CONTROL SLIDER SCREENING ASSESSMENT
         function toggleRequirementSlider(index) {
             const checkBox = document.getElementById(`req-item-${index}-check`);
             const slider = document.getElementById(`req-item-${index}-range`);
@@ -614,8 +534,20 @@
             }
         }
 
-        // TRIGGER FORM APPLY
+        // ==========================================
+        // CONDITIONAL APPLY: WAJIB LENGKAPI PROFIL
+        // ==========================================
         function triggerApplyModal(buttonElement) {
+            // Cek data profile di localStorage
+            const savedProfile = JSON.parse(localStorage.getItem('user_profile_completed'));
+            
+            // Validasi: Harus memiliki Nama dan No Handphone yang tidak kosong
+            if (!savedProfile || !savedProfile.nama || !savedProfile.phone) {
+                alert("Peringatan: Silakan lengkapi profil diri Anda terlebih dahulu sebelum mengirim lamaran posisi ini!");
+                openEditProfileModal(); // Otomatis membuka pop-up kelola profil
+                return; // Stop proses apply
+            }
+
             const jabatan = buttonElement.getAttribute('data-jabatan');
             const perusahaan = buttonElement.getAttribute('data-departemen');
             const requirement = buttonElement.getAttribute('data-requirement');
@@ -626,30 +558,26 @@
             document.getElementById('modal-job-company').innerText = perusahaan;
             document.getElementById('modal-job-aktivitas').innerText = aktivitas;
 
-            const savedProfile = JSON.parse(localStorage.getItem('user_profile_completed'));
-            if (savedProfile) {
-                document.getElementById('form-email').value = savedProfile.email || '';
-                document.getElementById('form-nama').value = savedProfile.nama || '';
-                document.getElementById('form-is-adhi').value = savedProfile.isAdhi || 'Tidak';
-                document.getElementById('form-npp').value = savedProfile.npp || '';
-                document.getElementById('form-phone').value = savedProfile.phone || '';
-                document.getElementById('form-penugasan').value = savedProfile.penugasan || '';
-                document.getElementById('form-atasan').value = savedProfile.atasan || '';
-                document.getElementById('form-durasi').value = savedProfile.durasi || '';
-                document.getElementById('form-cv').value = savedProfile.cvLink || '';
-                
-                let certsString = "Tidak Ada";
-                if(savedProfile.certifications && savedProfile.certifications.length > 0){
-                    certsString = savedProfile.certifications.map(c => `${c.nama} (Exp: ${c.expired || '-'}) Link: ${c.link || '-'}`).join(' | ');
-                }
-                document.getElementById('form-certs').value = certsString;
+            document.getElementById('form-email').value = savedProfile.email || '';
+            document.getElementById('form-nama').value = savedProfile.nama || '';
+            document.getElementById('form-is-adhi').value = savedProfile.isAdhi || 'Tidak';
+            document.getElementById('form-npp').value = savedProfile.npp || '';
+            document.getElementById('form-phone').value = savedProfile.phone || '';
+            document.getElementById('form-penugasan').value = savedProfile.penugasan || '';
+            document.getElementById('form-atasan').value = savedProfile.atasan || '';
+            document.getElementById('form-durasi').value = savedProfile.durasi || '';
+            document.getElementById('form-cv').value = savedProfile.cvLink || '';
+            
+            let certsString = "Tidak Ada";
+            if(savedProfile.certifications && savedProfile.certifications.length > 0){
+                certsString = savedProfile.certifications.map(c => `${c.nama} (Exp: ${c.expired || '-'}) Link: ${c.link || '-'}`).join(' | ');
             }
+            document.getElementById('form-certs').value = certsString;
             
             const reqContainer = document.getElementById('dynamic-requirement-container');
             if(reqContainer) {
                 reqContainer.innerHTML = ''; 
                 const reqList = requirement.split('|').map(item => item.trim()).filter(item => item.length > 0);
-
                 reqList.forEach((reqText, index) => {
                     reqContainer.insertAdjacentHTML('beforeend', `
                         <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5 transition-all">
@@ -683,10 +611,8 @@
             }
         }
 
-        // KIRIM LAMARAN
         function handleFormSubmit(event) {
             event.preventDefault();
-            
             const email = document.getElementById('form-email').value;
             const nama = document.getElementById('form-nama').value;
             const isAdhi = document.getElementById('form-is-adhi').value;
@@ -710,16 +636,10 @@
                     }
                 }
             }
-            
             const namaDanStatusPegawai = isAdhi === 'Ya' ? `${nama} (Pegawai ADHI - NPP: ${npp})` : `${nama} (Bukan Pegawai ADHI)`;
 
             const payload = {
-                email: email, 
-                nama: namaDanStatusPegawai, 
-                phone: phone, 
-                penugasan: penugasan, 
-                atasan: atasan, 
-                durasi: durasi,
+                email: email, nama: namaDanStatusPegawai, phone: phone, penugasan: penugasan, atasan: atasan, durasi: durasi,
                 alasanDanAssessment: `[POSISI]: ${currentActiveJob} (${currentActiveCompany}) | [ASSESSMENT]: ${assessmentSummary.join(', ')} | [KOMPETENSI]: ${certsDataText} | [ALASAN]: ${alasan}`,
                 cvLink: cvLink
             };
@@ -729,12 +649,10 @@
             .catch(err => { console.error(err); alert('Terjadi kesalahan saat mengirim data.'); });
         }
 
-        // FILTER TAB LOWONGAN UTAMA
         function switchStatusTab(status) {
             currentStatusFilter = status;
             const tabOpen = document.getElementById('tab-open');
             const tabClosed = document.getElementById('tab-closed');
-            
             if (status === 'open') {
                 if(tabOpen) tabOpen.className = "px-5 py-2.5 text-sm font-bold border-b-2 border-rose-800 text-rose-800 transition-all";
                 if(tabClosed) tabClosed.className = "px-5 py-2.5 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all";
@@ -745,7 +663,6 @@
             renderGroupedJobs();
         }
 
-        // FETCH DATA LOWONGAN DARI GOOGLE SHEET
         async function fetchJobs() {
             let container = document.getElementById('job-container');
             let skeleton = document.getElementById('loading-state');
@@ -766,6 +683,9 @@
                 const idxAktivitas = headers.findIndex(h => h.includes('aktivitas'));
                 const idxRequirement = headers.findIndex(h => h.includes('kualifikasi') || h.includes('requirement'));
                 const idxStatus = headers.findIndex(h => h.includes('status'));
+                
+                // MENDETEKSI KOLOM KUOTA BARU DARI DRIVE
+                const idxKuota = headers.findIndex(h => h.includes('kuota') || h.includes('kebutuhan') || h.includes('jumlah'));
 
                 allJobsData = [];
                 let openCount = 0;
@@ -781,10 +701,12 @@
                     const requirement = (idxRequirement !== -1 && row.c[idxRequirement]) ? String(row.c[idxRequirement].v) : '';
                     let statusRaw = (idxStatus !== -1 && row.c[idxStatus] && row.c[idxStatus].v) ? String(row.c[idxStatus].v).trim() : 'Open';
                     let status = statusRaw.toLowerCase() === 'open' ? 'open' : 'closed';
+                    
+                    // Ambil isi nilai kolom kuota (jika kosong atau tidak ditemukan, default di-set 1)
+                    const kuota = (idxKuota !== -1 && row.c[idxKuota] && row.c[idxKuota].v) ? String(row.c[idxKuota].v).trim() : '1';
 
                     if (status === 'open') openCount++; else closedCount++;
-
-                    allJobsData.push({ jabatan, departemen, penugasan, aktivitas, requirement, status });
+                    allJobsData.push({ jabatan, departemen, penugasan, aktivitas, requirement, status, kuota });
                 });
 
                 if(document.getElementById('count-open')) document.getElementById('count-open').innerText = openCount;
@@ -804,7 +726,6 @@
             container.innerHTML = '';
 
             const filteredJobs = allJobsData.filter(j => j.status === currentStatusFilter);
-
             if (filteredJobs.length === 0) {
                 container.innerHTML = `<p class="text-center text-slate-400 py-12 bg-white/50 rounded-2xl border border-slate-200 text-sm">Tidak ada lowongan dengan status ini.</p>`;
                 return;
@@ -828,7 +749,6 @@
                                 <span>Departemen: ${deptName}</span>
                             </h2>
                         </div>
-                        
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="space-y-4">
                                 <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
@@ -839,7 +759,6 @@
                                     ${generateJobCardsHTML(groupedByDept[deptName]['Kantor'])}
                                 </div>
                             </div>
-
                             <div class="space-y-4">
                                 <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
                                     <span>🏗️ Penugasan Proyek</span>
@@ -874,8 +793,12 @@
 
                 return `
                     <div class="p-4 bg-slate-50 border border-slate-200/70 hover:border-slate-300 rounded-xl transition-all shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div class="space-y-1 max-w-[80%]">
-                            <h4 class="text-sm font-bold text-slate-800 line-clamp-1">${job.jabatan}</h4>
+                        <div class="space-y-1.5 max-w-[8%] sm:max-w-[75%]">
+                            <div class="flex items-center space-x-2 flex-wrap">
+                                <h4 class="text-sm font-bold text-slate-800 line-clamp-1">${job.jabatan}</h4>
+                                <!-- BAGIAN INFORMASI KUOTA KEBUTUHAN KERJA -->
+                                <span class="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-md">Kuota: ${job.kuota} Orang</span>
+                            </div>
                             <p class="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">${job.requirement.replace(/\|/g, ' • ')}</p>
                         </div>
                         <div class="flex items-center justify-end">${buttonHTML}</div>
