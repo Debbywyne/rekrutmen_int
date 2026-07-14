@@ -20,7 +20,7 @@
 <body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen">
 
     <!-- ========================================== -->
-    <!-- SCREEN 1: AUTENTIKASI LOGIN BY EMAIL (BYPASS OAUTH) -->
+    <!-- SCREEN 1: AUTENTIKASI LOGIN BY EMAIL -->
     <!-- ========================================== -->
     <div id="login-google-screen" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 z-50">
         <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-white/40 text-center space-y-6">
@@ -44,7 +44,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- SCREEN 2: 3 PERTANYAAN PROFIL DIRI (AWAL) -->
+    <!-- SCREEN 2: SETUP PROFIL AWAL -->
     <!-- ========================================== -->
     <div id="profile-setup-screen" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden overflow-y-auto">
         <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-white/40 space-y-6">
@@ -119,11 +119,29 @@
 
             <div id="loading-state" class="space-y-4">
                 <div class="h-24 bg-slate-200 animate-pulse rounded-2xl"></div>
-                <div class="h-24 bg-slate-200 animate-pulse rounded-2xl"></div>
             </div>
 
-            <div id="job-container" class="space-y-6"></div>
+            <!-- Wadah utama untuk Grid Card Departemen -->
+            <div id="job-container"></div>
         </main>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL: GRID POP-UP LOWONGAN PER DEPARTEMEN -->
+    <!-- ========================================== -->
+    <div id="dept-jobs-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-40 hidden transition-all">
+        <div id="dept-jobs-box" class="bg-white rounded-3xl max-w-5xl w-full max-h-[85vh] overflow-y-auto p-6 shadow-2xl border border-slate-100 transform scale-95 opacity-0 transition-all space-y-6">
+            
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                <div>
+                    <h3 class="text-base font-extrabold text-slate-900" id="dept-modal-title">Lowongan Departemen</h3>
+                    <p class="text-xs text-slate-400">Silakan pilih posisi yang sesuai dengan kompetensi Anda.</p>
+                </div>
+                <button onclick="closeDeptJobsModal()" class="text-slate-400 hover:text-slate-600 text-sm font-medium p-1.5 hover:bg-slate-50 rounded-lg transition-all">Tutup</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="dept-modal-content"></div>
+        </div>
     </div>
 
     <!-- ========================================== -->
@@ -135,7 +153,7 @@
             <div class="flex justify-between items-center border-b border-slate-100 pb-2">
                 <div>
                     <h3 class="text-base font-bold text-slate-900">Perbarui Profil Lengkap</h3>
-                    <p class="text-xs text-slate-400">Kelola dan update informasi Anda kapan saja.</p>
+                    <p class="text-xs text-slate-400">Seluruh data wajib diisi sebelum melamar lowongan pekerjaan.</p>
                 </div>
                 <button onclick="closeEditProfileModal()" class="text-slate-400 hover:text-slate-600 text-sm font-medium p-1.5 hover:bg-slate-50 rounded-lg transition-all">Tutup</button>
             </div>
@@ -150,7 +168,6 @@
             </div>
 
             <form id="edit-profile-form" onsubmit="handleProfileUpdateSubmit(event)" class="space-y-6 pt-2">
-                
                 <div id="edit-subpage-1" class="space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
@@ -177,8 +194,8 @@
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Lokasi Penugasan Saat Ini (Opsional)</label>
-                            <select id="edit-penugasan" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none bg-white">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Lokasi Penugasan Saat Ini <span class="text-rose-600">*</span></label>
+                            <select id="edit-penugasan" required class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none bg-white">
                                 <option value="">-- Pilih Lokasi --</option>
                                 <option value="Kantor Pusat">Kantor Pusat</option>
                                 <option value="Divisi / Infrastruktur">Divisi / Infrastruktur</option>
@@ -188,18 +205,18 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Atasan Langsung (Opsional)</label>
-                            <input type="text" id="edit-atasan" placeholder="Nama Atasan / PM" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Atasan Langsung <span class="text-rose-600">*</span></label>
+                            <input type="text" id="edit-atasan" required placeholder="Nama Atasan / PM" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none">
                         </div>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Durasi Penugasan (Opsional)</label>
-                            <input type="text" id="edit-durasi" placeholder="Contoh: 2 Tahun" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Durasi Penugasan <span class="text-rose-600">*</span></label>
+                            <input type="text" id="edit-durasi" required placeholder="Contoh: 2 Tahun" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-1">Link CV Terupdate (Opsional)</label>
-                            <input type="url" id="edit-cv" placeholder="https://drive.google.com/..." class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Link CV Terupdate (Google Drive) <span class="text-rose-600">*</span></label>
+                            <input type="url" id="edit-cv" required placeholder="https://drive.google.com/..." class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none">
                         </div>
                     </div>
                 </div>
@@ -280,6 +297,7 @@
         let currentActiveJob = null;
         let currentActiveCompany = null;
         let allJobsData = [];
+        let globalGroupedDeptData = {}; 
         let currentStatusFilter = 'open';
         let temporaryEmailToken = ''; 
 
@@ -535,26 +553,26 @@
         }
 
         // ==========================================
-        // CONDITIONAL APPLY: WAJIB LENGKAPI PROFIL
+        // VALIDASI KETAT DAN PEMICU MODAL FORM APPLY
         // ==========================================
         function triggerApplyModal(buttonElement) {
-            // Cek data profile di localStorage
             const savedProfile = JSON.parse(localStorage.getItem('user_profile_completed'));
             
-            // 2. VALIDASI KETAT: Cek apakah data utama dan berkas pendukung sudah lengkap semua
-    if (
-        !savedProfile || 
-        !savedProfile.nama || 
-        !savedProfile.phone || 
-        !savedProfile.penugasan ||  // Wajib isi Lokasi Penugasan
-        !savedProfile.atasan ||     // Wajib isi Nama Atasan
-        !savedProfile.durasi ||     // Wajib isi Durasi Penugasan
-        !savedProfile.cvLink        // Wajib isi Link CV
-    ) {
-        alert("Peringatan: Anda belum melengkapi seluruh profil diri. Mohon lengkapi Data Penugasan & Link CV Anda terlebih dahulu pada menu Kelola Profil untuk dapat melamar!");
-        openEditProfileModal(); // Otomatis membuka pop-up kelola profil
-        return; // Blokir proses apply
-    }
+            // Pengecekan Kritis: Harus terisi lengkap data penugasan utamanya di Profil
+            if (
+                !savedProfile || 
+                !savedProfile.nama || 
+                !savedProfile.phone || 
+                !savedProfile.penugasan || 
+                !savedProfile.atasan || 
+                !savedProfile.durasi || 
+                !savedProfile.cvLink
+            ) {
+                alert("Peringatan: Anda belum melengkapi seluruh profil diri. Mohon lengkapi Data Penugasan & Link CV Anda terlebih dahulu pada menu Kelola Profil untuk dapat melamar posisi ini!");
+                closeDeptJobsModal(); // Tutup pop-up departemen dulu agar fokus ke profile
+                openEditProfileModal(); // Buka pop-up pengisian profil diri
+                return;
+            }
 
             const jabatan = buttonElement.getAttribute('data-jabatan');
             const perusahaan = buttonElement.getAttribute('data-departemen');
@@ -691,8 +709,6 @@
                 const idxAktivitas = headers.findIndex(h => h.includes('aktivitas'));
                 const idxRequirement = headers.findIndex(h => h.includes('kualifikasi') || h.includes('requirement'));
                 const idxStatus = headers.findIndex(h => h.includes('status'));
-                
-                // MENDETEKSI KOLOM KUOTA BARU DARI DRIVE
                 const idxKuota = headers.findIndex(h => h.includes('kuota') || h.includes('kebutuhan') || h.includes('jumlah'));
 
                 allJobsData = [];
@@ -709,8 +725,6 @@
                     const requirement = (idxRequirement !== -1 && row.c[idxRequirement]) ? String(row.c[idxRequirement].v) : '';
                     let statusRaw = (idxStatus !== -1 && row.c[idxStatus] && row.c[idxStatus].v) ? String(row.c[idxStatus].v).trim() : 'Open';
                     let status = statusRaw.toLowerCase() === 'open' ? 'open' : 'closed';
-                    
-                    // Ambil isi nilai kolom kuota (jika kosong atau tidak ditemukan, default di-set 1)
                     const kuota = (idxKuota !== -1 && row.c[idxKuota] && row.c[idxKuota].v) ? String(row.c[idxKuota].v).trim() : '1';
 
                     if (status === 'open') openCount++; else closedCount++;
@@ -728,103 +742,107 @@
             } finally { if (skeleton) skeleton.classList.add('hidden'); }
         }
 
+        // ==========================================
+        // RENDER DEPARTEMEN KE BENTUK GRID CARD SCORECARD
+        // ==========================================
         function renderGroupedJobs() {
-    const container = document.getElementById('job-container');
-    if(!container) return;
-    container.innerHTML = '';
+            const container = document.getElementById('job-container');
+            if(!container) return;
+            container.innerHTML = '';
 
-    const filteredJobs = allJobsData.filter(j => j.status === currentStatusFilter);
-    if (filteredJobs.length === 0) {
-        container.innerHTML = `<p class="text-center text-slate-400 py-12 bg-white/50 rounded-2xl border border-slate-200 text-sm">Tidak ada lowongan dengan status ini.</p>`;
-        return;
-    }
+            const filteredJobs = allJobsData.filter(j => j.status === currentStatusFilter);
+            if (filteredJobs.length === 0) {
+                container.innerHTML = `<p class="text-center text-slate-400 py-12 bg-white/50 rounded-2xl border border-slate-200 text-sm">Tidak ada lowongan dengan status ini.</p>`;
+                return;
+            }
 
-    const groupedByDept = {};
-    filteredJobs.forEach(job => {
-        if (!groupedByDept[job.departemen]) {
-            groupedByDept[job.departemen] = { Kantor: [], Proyek: [] };
-        }
-        groupedByDept[job.departemen][job.penugasan].push(job);
-    });
+            globalGroupedDeptData = {};
+            filteredJobs.forEach(job => {
+                if (!globalGroupedDeptData[job.departemen]) {
+                    globalGroupedDeptData[job.departemen] = { Kantor: [], Proyek: [] };
+                }
+                globalGroupedDeptData[job.departemen][job.penugasan].push(job);
+            });
 
-    let htmlContent = '';
-    let index = 0; // Digunakan sebagai ID unik masing-masing departemen
+            let htmlContent = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">`;
 
-    for (const deptName in groupedByDept) {
-        const totalJobsInDept = groupedByDept[deptName]['Kantor'].length + groupedByDept[deptName]['Proyek'].length;
-        const deptId = `dept-content-${index}`;
-        const arrowId = `dept-arrow-${index}`;
-
-        htmlContent += `
-            <div class="bg-white/70 backdrop-blur-md rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden transition-all">
+            for (const deptName in globalGroupedDeptData) {
+                const totalKantor = globalGroupedDeptData[deptName]['Kantor'].length;
+                const totalProyek = globalGroupedDeptData[deptName]['Proyek'].length;
+                const totalJobs = totalKantor + totalProyek;
                 
-                <!-- HEADER DEPARTEMEN (DAPAT DIKLIK UNTUK EXPAND/COLLAPSE) -->
-                <div onclick="toggleDepartment('${deptId}', '${arrowId}')" class="p-6 flex justify-between items-center cursor-pointer hover:bg-slate-50/80 transition-all select-none">
-                    <h2 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
-                        <span class="w-1.5 h-5 bg-rose-800 rounded-full"></span>
-                        <span>Departemen: ${deptName}</span>
-                        <span class="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-full border border-slate-200 font-medium">${totalJobsInDept} Lowongan</span>
-                    </h2>
-                    
-                    <!-- Ikon Panah Status -->
-                    <div class="p-2 hover:bg-slate-200/50 rounded-xl transition-all">
-                        <span id="${arrowId}" class="inline-block transition-transform duration-300 transform text-slate-500 font-bold text-sm">
-                            ▼
-                        </span>
-                    </div>
-                </div>
+                const escapedDeptName = deptName.replace(/'/g, "\\'");
 
-                <!-- KONTEN PEKERJAAN (Awalnya disembunyikan menggunakan kelas 'hidden') -->
-                <div id="${deptId}" class="hidden border-t border-slate-150 p-6 bg-white/40 space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Penugasan Kantor -->
-                        <div class="space-y-4">
-                            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
-                                <span>🏢 Penugasan Kantor</span>
-                                <span class="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded text-[10px] font-bold">${groupedByDept[deptName]['Kantor'].length}</span>
-                            </h3>
-                            <div class="space-y-3">
-                                ${generateJobCardsHTML(groupedByDept[deptName]['Kantor'])}
+                htmlContent += `
+                    <div onclick="openDeptJobsModal('${escapedDeptName}')" class="bg-white border border-slate-200 hover:border-blue-500 hover:ring-2 hover:ring-blue-500/20 rounded-2xl p-6 text-center space-y-4 shadow-xs transition-all duration-200 cursor-pointer group flex flex-col justify-between min-h-[220px]">
+                        <div class="space-y-2">
+                            <div class="mx-auto w-12 h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-xl shadow-2xs group-hover:bg-blue-50 group-hover:border-blue-100 transition-all">
+                                💼
                             </div>
+                            <h3 class="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2">${deptName}</h3>
                         </div>
                         
-                        <!-- Penugasan Proyek -->
-                        <div class="space-y-4">
-                            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
-                                <span>🏗️ Penugasan Proyek</span>
-                                <span class="bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded text-[10px] font-bold">${groupedByDept[deptName]['Proyek'].length}</span>
-                            </h3>
-                            <div class="space-y-3">
-                                ${generateJobCardsHTML(groupedByDept[deptName]['Proyek'])}
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-center space-x-2 text-[11px] text-slate-500 font-medium">
+                                <span class="bg-slate-50 border border-slate-100 px-2 py-1 rounded-md">🏢 Kantor: ${totalKantor}</span>
+                                <span class="bg-slate-50 border border-slate-100 px-2 py-1 rounded-md">🏗️ Proyek: ${totalProyek}</span>
+                            </div>
+                            <div class="text-xs font-bold text-blue-600 bg-blue-50/60 group-hover:bg-blue-600 group-hover:text-white py-2 rounded-xl transition-all border border-blue-100/50">
+                                Lihat ${totalJobs} Lowongan →
                             </div>
                         </div>
                     </div>
-                </div>
+                `;
+            }
 
-            </div>
-        `;
-        index++;
-    }
-    container.innerHTML = htmlContent;
-}
-
-// FUNGSI BARU UNTUK MATCHING LOCK-UNLOCK BUKA TUTUP DEPARTEMEN
-function toggleDepartment(contentId, arrowId) {
-    const content = document.getElementById(contentId);
-    const arrow = document.getElementById(arrowId);
-
-    if (content && arrow) {
-        if (content.classList.contains('hidden')) {
-            // BUKA KONTEN
-            content.classList.remove('hidden');
-            arrow.classList.add('rotate-180'); // Membuat panah mengarah ke atas (▲)
-        } else {
-            // TUTUP KONTEN
-            content.classList.add('hidden');
-            arrow.classList.remove('rotate-180'); // Mengembalikan panah mengarah ke bawah (▼)
+            htmlContent += `</div>`;
+            container.innerHTML = htmlContent;
         }
-    }
-}
+
+        // FUNGSI MEMBUKA MODAL LIST PEKERJAAN DEPARTEMEN
+        function openDeptJobsModal(deptName) {
+            const modal = document.getElementById('dept-jobs-modal');
+            const box = document.getElementById('dept-jobs-box');
+            const title = document.getElementById('dept-modal-title');
+            const content = document.getElementById('dept-modal-content');
+
+            if(!modal || !box || !globalGroupedDeptData[deptName]) return;
+
+            title.innerText = `Departemen: ${deptName}`;
+            
+            content.innerHTML = `
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
+                        <span>🏢 Penugasan Kantor</span>
+                        <span class="bg-slate-100 border text-slate-700 px-1.5 py-0.5 rounded text-[10px] font-bold">${globalGroupedDeptData[deptName]['Kantor'].length}</span>
+                    </h4>
+                    <div class="space-y-3">
+                        ${generateJobCardsHTML(globalGroupedDeptData[deptName]['Kantor'])}
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
+                        <span>🏗️ Penugasan Proyek</span>
+                        <span class="bg-slate-100 border text-slate-700 px-1.5 py-0.5 rounded text-[10px] font-bold">${globalGroupedDeptData[deptName]['Proyek'].length}</span>
+                    </h4>
+                    <div class="space-y-3">
+                        ${generateJobCardsHTML(globalGroupedDeptData[deptName]['Proyek'])}
+                    </div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => { box.classList.remove('scale-95', 'opacity-0'); box.classList.add('scale-100', 'opacity-100'); }, 50);
+        }
+
+        function closeDeptJobsModal() {
+            const modal = document.getElementById('dept-jobs-modal');
+            const box = document.getElementById('dept-jobs-box');
+            if(modal && box) {
+                box.classList.remove('scale-100', 'opacity-100'); box.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => { modal.classList.add('hidden'); }, 200);
+            }
+        }
 
         function generateJobCardsHTML(jobsList) {
             if (jobsList.length === 0) {
@@ -844,10 +862,9 @@ function toggleDepartment(contentId, arrowId) {
 
                 return `
                     <div class="p-4 bg-slate-50 border border-slate-200/70 hover:border-slate-300 rounded-xl transition-all shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div class="space-y-1.5 max-w-[8%] sm:max-w-[75%]">
+                        <div class="space-y-1.5 max-w-full sm:max-w-[75%]">
                             <div class="flex items-center space-x-2 flex-wrap">
                                 <h4 class="text-sm font-bold text-slate-800 line-clamp-1">${job.jabatan}</h4>
-                                <!-- BAGIAN INFORMASI KUOTA KEBUTUHAN KERJA -->
                                 <span class="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-md">Kuota: ${job.kuota} Orang</span>
                             </div>
                             <p class="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">${job.requirement.replace(/\|/g, ' • ')}</p>
