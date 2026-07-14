@@ -140,7 +140,8 @@
                 <button onclick="closeDeptJobsModal()" class="text-slate-400 hover:text-slate-600 text-sm font-medium p-1.5 hover:bg-slate-50 rounded-lg transition-all">Tutup</button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="dept-modal-content"></div>
+            <!-- Bagian ini diubah menjadi tata letak vertikal flex stack -->
+            <div class="flex flex-col space-y-8" id="dept-modal-content"></div>
         </div>
     </div>
 
@@ -552,13 +553,9 @@
             }
         }
 
-        // ==========================================
-        // VALIDASI KETAT DAN PEMICU MODAL FORM APPLY
-        // ==========================================
         function triggerApplyModal(buttonElement) {
             const savedProfile = JSON.parse(localStorage.getItem('user_profile_completed'));
             
-            // Pengecekan Kritis: Harus terisi lengkap data penugasan utamanya di Profil
             if (
                 !savedProfile || 
                 !savedProfile.nama || 
@@ -569,8 +566,8 @@
                 !savedProfile.cvLink
             ) {
                 alert("Peringatan: Anda belum melengkapi seluruh profil diri. Mohon lengkapi Data Penugasan & Link CV Anda terlebih dahulu pada menu Kelola Profil untuk dapat melamar posisi ini!");
-                closeDeptJobsModal(); // Tutup pop-up departemen dulu agar fokus ke profile
-                openEditProfileModal(); // Buka pop-up pengisian profil diri
+                closeDeptJobsModal(); 
+                openEditProfileModal(); 
                 return;
             }
 
@@ -742,9 +739,6 @@
             } finally { if (skeleton) skeleton.classList.add('hidden'); }
         }
 
-        // ==========================================
-        // RENDER DEPARTEMEN KE BENTUK GRID CARD SCORECARD
-        // ==========================================
         function renderGroupedJobs() {
             const container = document.getElementById('job-container');
             if(!container) return;
@@ -799,7 +793,7 @@
             container.innerHTML = htmlContent;
         }
 
-        // FUNGSI MEMBUKA MODAL LIST PEKERJAAN DEPARTEMEN
+        // FUNGSI MEMBUKA MODAL LIST PEKERJAAN DEPARTEMEN (PENGATURAN STRUKTUR VERTIKAL BARU)
         function openDeptJobsModal(deptName) {
             const modal = document.getElementById('dept-jobs-modal');
             const box = document.getElementById('dept-jobs-box');
@@ -810,6 +804,8 @@
 
             title.innerText = `Departemen: ${deptName}`;
             
+            // Layout diubah ke susunan vertikal penuh dengan padding bawah agar baris paling bawah aman
+            content.className = "flex flex-col space-y-8 pb-6";
             content.innerHTML = `
                 <div class="space-y-4">
                     <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center space-x-1.5">
@@ -844,6 +840,7 @@
             }
         }
 
+        // GENERATE KARTU LOWONGAN DENGAN FITUR TERBARU & MENCEGAH KONTEN TERPOTONG
         function generateJobCardsHTML(jobsList) {
             if (jobsList.length === 0) {
                 return `<p class="text-xs text-slate-400 italic py-4 bg-slate-50/50 rounded-xl text-center border border-dashed border-slate-200">Tidak ada lowongan</p>`;
@@ -857,19 +854,20 @@
                 const safeAkt = job.aktivitas.replace(/"/g, '&quot;');
 
                 const buttonHTML = isOpen 
-                    ? `<button onclick="triggerApplyModal(this)" data-jabatan="${safeJabatan}" data-departemen="${safeDept}" data-requirement="${safeReq}" data-aktivitas="${safeAkt}" class="w-full sm:w-auto text-center bg-red-800 hover:bg-red-900 text-white font-semibold text-[11px] px-3 py-1.5 rounded-lg shadow-sm transition-all shrink-0">Apply</button>`
-                    : `<span class="text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-1 rounded border border-rose-200 shrink-0">Closed</span>`;
+                    ? `<button onclick="triggerApplyModal(this)" data-jabatan="${safeJabatan}" data-departemen="${safeDept}" data-requirement="${safeReq}" data-aktivitas="${safeAkt}" class="w-full sm:w-auto text-center bg-red-800 hover:bg-red-900 text-white font-semibold text-[11px] px-4 py-2 rounded-lg shadow-sm transition-all shrink-0">Apply</button>`
+                    : `<span class="text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-1 rounded border border-rose-200 shrink-0 text-center block sm:inline">Closed</span>`;
 
+                // Penghapusan batas maksimum persen lebar (max-w-[75%]) dan line-clamp, diganti flex penuh + break-words agar teks membungkus otomatis ke bawah secara rapi
                 return `
-                    <div class="p-4 bg-slate-50 border border-slate-200/70 hover:border-slate-300 rounded-xl transition-all shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div class="space-y-1.5 max-w-full sm:max-w-[75%]">
-                            <div class="flex items-center space-x-2 flex-wrap">
-                                <h4 class="text-sm font-bold text-slate-800 line-clamp-1">${job.jabatan}</h4>
-                                <span class="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-md">Kuota: ${job.kuota} Orang</span>
+                    <div class="p-4 bg-slate-50 border border-slate-200/70 hover:border-slate-300 rounded-xl transition-all shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="space-y-2 flex-1 min-w-0">
+                            <div class="flex items-center space-x-2 flex-wrap gap-y-1">
+                                <h4 class="text-sm font-bold text-slate-800 break-words">${job.jabatan}</h4>
+                                <span class="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap">Kuota: ${job.kuota} Orang</span>
                             </div>
-                            <p class="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">${job.requirement.replace(/\|/g, ' • ')}</p>
+                            <p class="text-[11px] text-slate-500 leading-relaxed break-words">${job.requirement.replace(/\|/g, ' • ')}</p>
                         </div>
-                        <div class="flex items-center justify-end">${buttonHTML}</div>
+                        <div class="flex items-center justify-end pt-2 sm:pt-0 border-t sm:border-none border-slate-200/60">${buttonHTML}</div>
                     </div>
                 `;
             }).join('');
