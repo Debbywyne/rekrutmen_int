@@ -541,12 +541,20 @@
             // Cek data profile di localStorage
             const savedProfile = JSON.parse(localStorage.getItem('user_profile_completed'));
             
-            // Validasi: Harus memiliki Nama dan No Handphone yang tidak kosong
-            if (!savedProfile || !savedProfile.nama || !savedProfile.phone) {
-                alert("Peringatan: Silakan lengkapi profil diri Anda terlebih dahulu sebelum mengirim lamaran posisi ini!");
-                openEditProfileModal(); // Otomatis membuka pop-up kelola profil
-                return; // Stop proses apply
-            }
+            // 2. VALIDASI KETAT: Cek apakah data utama dan berkas pendukung sudah lengkap semua
+    if (
+        !savedProfile || 
+        !savedProfile.nama || 
+        !savedProfile.phone || 
+        !savedProfile.penugasan ||  // Wajib isi Lokasi Penugasan
+        !savedProfile.atasan ||     // Wajib isi Nama Atasan
+        !savedProfile.durasi ||     // Wajib isi Durasi Penugasan
+        !savedProfile.cvLink        // Wajib isi Link CV
+    ) {
+        alert("Peringatan: Anda belum melengkapi seluruh profil diri. Mohon lengkapi Data Penugasan & Link CV Anda terlebih dahulu pada menu Kelola Profil untuk dapat melamar!");
+        openEditProfileModal(); // Otomatis membuka pop-up kelola profil
+        return; // Blokir proses apply
+    }
 
             const jabatan = buttonElement.getAttribute('data-jabatan');
             const perusahaan = buttonElement.getAttribute('data-departemen');
