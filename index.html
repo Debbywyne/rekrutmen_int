@@ -6,6 +6,8 @@
     <title>Portal Lowongan Kerja ADHI</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Identity Services (OAuth) Library -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         .glass-input {
             background: rgba(255, 255, 255, 0.8);
@@ -20,23 +22,34 @@
 <body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen">
 
     <!-- ========================================== -->
-    <!-- SCREEN: INITIAL LOGIN & SETUP PROFILE -->
+    <!-- SCREEN 1: AUTENTIKASI LOGIN BY GMAIL -->
     <!-- ========================================== -->
-    <div id="profile-setup-screen" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
-        <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-white/40 transform transition-all space-y-6">
-            <div class="text-center space-y-2">
+    <div id="login-google-screen" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 z-50">
+        <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-white/40 text-center space-y-6">
+            <div class="space-y-2">
                 <div class="inline-flex p-3 bg-rose-50 rounded-2xl text-rose-800 font-bold text-xl tracking-wider">ADHI</div>
-                <h2 class="text-xl font-extrabold text-slate-950 tracking-tight">Login & Pengisian Profil</h2>
-                <p class="text-xs text-slate-500">Silakan masukkan email aktif Anda dan lengkapi 3 pertanyaan profil berikut.</p>
+                <h2 class="text-xl font-extrabold text-slate-950 tracking-tight">Portal Internal Job Posting</h2>
+                <p class="text-xs text-slate-500">Silakan masuk menggunakan akun Gmail aktif Anda terlebih dahulu.</p>
+            </div>
+
+            <!-- Google Sign-In Button Container -->
+            <div class="flex justify-center py-4">
+                <div id="google-btn-wrapper"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- SCREEN 2: 3 PERTANYAAN PROFIL DIRI (SETELAH GMAIL AUTH) -->
+    <!-- ========================================== -->
+    <div id="profile-setup-screen" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden overflow-y-auto">
+        <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-white/40 space-y-6">
+            <div class="text-center space-y-2">
+                <h2 class="text-xl font-extrabold text-slate-950 tracking-tight">Lengkapi Profil Anda</h2>
+                <p class="text-xs text-slate-500">Terautentikasi sebagai: <span id="setup-display-email" class="font-bold text-slate-800"></span></p>
             </div>
 
             <form id="profile-setup-form" onsubmit="handleProfileSetupSubmit(event)" class="space-y-4">
-                <!-- Autentikasi Gmail / Email -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Email Aktif (Gmail) <span class="text-rose-600">*</span></label>
-                    <input type="email" id="setup-email" required placeholder="user@gmail.com" class="w-full px-3.5 py-2 text-sm glass-input rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-800/20 transition-all">
-                </div>
-
                 <!-- Pertanyaan Profil 1: Nama Lengkap -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1.5">1. Nama Lengkap (Sesuai KTP) <span class="text-rose-600">*</span></label>
@@ -65,7 +78,7 @@
                 </div>
 
                 <button type="submit" class="w-full bg-red-800 hover:bg-red-900 text-white font-bold text-sm py-3 rounded-xl shadow-md transition-all flex items-center justify-center space-x-2 mt-2">
-                    <span>Masuk & Simpan</span>
+                    <span>Simpan & Masuk ke Portal</span>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
                 </button>
             </form>
@@ -92,7 +105,7 @@
                     <button onclick="openEditProfileModal()" class="flex items-center space-x-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs px-3.5 py-2 rounded-xl transition-all">
                         <span>👤 Kelola Profil</span>
                     </button>
-                    <!-- Tombol Logout Tambahan -->
+                    <!-- Tombol Logout -->
                     <button onclick="handleLogout()" class="flex items-center space-x-1 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs px-3.5 py-2 rounded-xl border border-rose-200 transition-all">
                         <span>🚪 Logout</span>
                     </button>
@@ -138,7 +151,7 @@
                 <button onclick="closeEditProfileModal()" class="text-slate-400 hover:text-slate-600 text-sm font-medium p-1.5 hover:bg-slate-50 rounded-lg transition-all">Tutup</button>
             </div>
 
-            <!-- SUB-PAGE TAB NAVIGATION (Bisa diklik bebas untuk pindah tab) -->
+            <!-- SUB-PAGE TAB NAVIGATION -->
             <div class="flex border-b border-slate-200 select-none">
                 <div id="btn-subtab-1" onclick="switchProfileSubPage(1)" class="flex-1 text-center py-2.5 text-xs font-bold border-b-2 border-rose-800 text-rose-800 transition-all cursor-pointer">
                     1. Data Utama & Penugasan
@@ -275,50 +288,120 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- LOGIKA JAVASCRIPT -->
+    <!-- LOGIKA JAVASCRIPT & AUTENTIKASI GOOGLE -->
     <!-- ========================================== -->
     <script>
         const SPREADSHEET_ID = '1gd6VUH334-0Kx3HCF2ZBnOyiShoOSaJbmTyvxIlesdU'; 
         const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=job`;
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyb2UyLIbmhwKeoP-mAfpq5sTvO5WyG1rkbVVyoEsalmOd3IoUDJwu9VEvqanshSuX6_w/exec'; 
 
+        // GANTI INI dengan Client ID Google Cloud Anda sendiri agar OAuth berfungsi penuh di domain produksi
+        const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.google.com'; 
+
         let currentActiveJob = null;
         let currentActiveCompany = null;
         let allJobsData = [];
         let currentStatusFilter = 'open';
+        let temporaryEmailToken = ''; // Menyimpan email hasil login Google sementara
 
-        // Cek Sesi Pertama Kali Buka Portal
-        window.addEventListener('DOMContentLoaded', () => {
+        // Inisialisasi Google Auth & Cek Sesi
+        window.onload = function () {
+            // 1. Inisialisasi Pustaka Google Sign-In
+            try {
+                google.accounts.id.initialize({
+                    client_id: GOOGLE_CLIENT_ID,
+                    callback: handleCredentialResponse
+                });
+                google.accounts.id.renderButton(
+                    document.getElementById("google-btn-wrapper"),
+                    { theme: "outline", size: "large", text: "signin_with" }
+                );
+            } catch (e) {
+                console.warn("Google API GSI failed to load. Make sure Client ID is valid.", e);
+            }
+
+            // 2. Periksa Sesi Keaktifan User
             checkUserSession();
-        });
+        };
 
+        // CALLBACK SETELAH USER BERHASIL LOGIN BY GMAIL
+        function handleCredentialResponse(response) {
+            // Mendekode payload JWT Token dari Google
+            const base64Url = response.credential.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            const googleUserData = JSON.parse(jsonPayload);
+            
+            // Dapatkan email dan nama bawaan dari akun Google
+            temporaryEmailToken = googleUserData.email;
+            const googleName = googleUserData.name || '';
+
+            // Sembunyikan Screen Login Google, Buka Screen 3 Pertanyaan Profil
+            document.getElementById('login-google-screen').classList.add('hidden');
+            document.getElementById('profile-setup-screen').classList.remove('hidden');
+            
+            document.getElementById('setup-display-email').innerText = temporaryEmailToken;
+            document.getElementById('setup-nama').value = googleName;
+        }
+
+        // CEK APAKAH PROFIL LENGKAP SUDAH TERSIMPAN
         function checkUserSession() {
             const savedProfile = localStorage.getItem('user_profile_completed');
             if (savedProfile) {
                 const profileObj = JSON.parse(savedProfile);
                 
-                // Tempel Teks Login di Navbar Header
                 const emailDisplay = document.getElementById('user-display-email');
                 if (emailDisplay && profileObj.email) {
                     emailDisplay.innerHTML = `Logged in as: <b class="text-slate-800">${profileObj.email}</b>`;
                 }
 
+                document.getElementById('login-google-screen').classList.add('hidden');
                 document.getElementById('profile-setup-screen').classList.add('hidden');
                 document.getElementById('main-portal').classList.remove('hidden');
                 fetchJobs();
             } else {
-                document.getElementById('profile-setup-screen').classList.remove('hidden');
+                document.getElementById('login-google-screen').classList.remove('hidden');
+                document.getElementById('profile-setup-screen').classList.add('hidden');
                 document.getElementById('main-portal').classList.add('hidden');
             }
         }
 
+        // PROSES SUBMIT 3 PERTANYAAN PROFIL DIRI
+        function handleProfileSetupSubmit(event) {
+            event.preventDefault();
+
+            const profileData = {
+                email: temporaryEmailToken,
+                nama: document.getElementById('setup-nama').value,
+                isAdhi: document.getElementById('setup-is-adhi').value,
+                npp: document.getElementById('setup-npp').value,
+                phone: document.getElementById('setup-phone').value,
+                penugasan: '',
+                atasan: '',
+                durasi: '',
+                cvLink: '',
+                certifications: []
+            };
+            
+            localStorage.setItem('user_profile_completed', JSON.stringify(profileData));
+            checkUserSession();
+        }
+
         // PROSES LOGOUT USER
         function handleLogout() {
-            if (confirm("Apakah Anda yakin ingin logout/keluar dari akun saat ini?")) {
+            if (confirm("Apakah Anda yakin ingin logout dari akun Gmail ini?")) {
                 localStorage.removeItem('user_profile_completed');
+                temporaryEmailToken = '';
                 document.getElementById('profile-setup-form').reset();
                 document.getElementById('setup-npp-container').classList.add('hidden');
-                checkUserSession(); // Singkronisasi ulang kembali ke login screen awal
+                
+                // Google Credential Sign out revoker
+                try { google.accounts.id.disableAutoSelect(); } catch(e){}
+                
+                checkUserSession(); 
             }
         }
 
@@ -357,27 +440,6 @@
                     nppInput.value = '';
                 }
             }
-        }
-
-        // SUBMIT LOGIN AWAL + 3 PERTANYAAN PROFIL
-        function handleProfileSetupSubmit(event) {
-            event.preventDefault();
-
-            const profileData = {
-                email: document.getElementById('setup-email').value,
-                nama: document.getElementById('setup-nama').value,
-                isAdhi: document.getElementById('setup-is-adhi').value,
-                npp: document.getElementById('setup-npp').value,
-                phone: document.getElementById('setup-phone').value,
-                penugasan: '',
-                atasan: '',
-                durasi: '',
-                cvLink: '',
-                certifications: []
-            };
-            
-            localStorage.setItem('user_profile_completed', JSON.stringify(profileData));
-            checkUserSession();
         }
 
         // BUKA MODAL EDIT PROFILE
